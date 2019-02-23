@@ -1,0 +1,11 @@
+# Compiler files
+.mti
+.mpf
+
+# Backup files
+.bak 
+
+# Package Files
+*.zip
+*.tar.gz
+*.rar
