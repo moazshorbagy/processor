@@ -1,9 +1,12 @@
 # Compiler files
-.mti
-.mpf
+*.mti
+*.mpf
 
 # Backup files
-.bak 
+*.bak 
+
+# Library directory
+work
 
 # Package Files
 *.zip
