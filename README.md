@@ -2,7 +2,7 @@
 FileNameExample => TriStateBuffer
 
 # 2 - Entities naming convention
-Same name used used for the file name should be used as the entity name
+Same name used for the file name should be used as the entity name
 
 # 3 - Variable naming convetion
 var_name_example => write_enable_1
