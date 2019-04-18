@@ -1,11 +1,14 @@
-# Files naming convention
+# 1 - Files naming convention
 FileNameExample => TriStateBuffer
 
-# Entities naming convention
+# 2 - Entities naming convention
 Same name used used for the file name should be used as the entity name
 
-# Variable naming convetion
+# 3 - Variable naming convetion
 var_name_example => write_enable_1
+
+# 4 - Reserved words naming convention
+All small letters => entity, architecture, in, out, etc.
 
 # Handling new files
 Each of us will commit \*.vhd
