@@ -13,3 +13,6 @@ work/
 *.zip
 *.tar.gz
 *.rar
+
+# Khara
+*.txt

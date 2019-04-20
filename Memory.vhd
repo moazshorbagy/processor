@@ -34,9 +34,10 @@ ARCHITECTURE memory_architecture OF memory IS
 						END IF;
 					END IF;
 				END IF;
-			data1 <= ram(to_integer(unsigned(address)));
+			
+		END PROCESS;
+		data1 <= ram(to_integer(unsigned(address)));
 			data2 <= ram(to_integer(unsigned(address)+1));
 			dataout <= data1 & data2;
-		END PROCESS;
 		
 END memory_architecture;
