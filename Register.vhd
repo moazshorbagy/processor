@@ -19,5 +19,3 @@ architecture behavioral of Reg is begin
     end if;
   end process;
 end architecture;
-
--- A7a
