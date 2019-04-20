@@ -6,7 +6,8 @@
 *.bak 
 
 # Library directory
-work
+work/
+*.wlf
 
 # Package Files
 *.zip
