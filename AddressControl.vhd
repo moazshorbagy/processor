@@ -9,7 +9,13 @@ port(
 	FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
 	address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
 	clk,rst: in std_logic;
-	pc_plus_one: out std_logic_vector(19 downto 0)
+	pc_plus_one: out std_logic_vector(19 downto 0);
+	
+	--Iteration 2...
+	spadd: in std_logic_vector(1 downto 0);
+	EA: in std_logic_vector (19 downto 0);
+	mem_addr_src: in std_logic_vector (1 downto 0)
+
 );
 end entity;
 
@@ -50,6 +56,7 @@ begin
 --Combinational part (Adding + Muxes)..
 
 mux_fat_sel: Mux2 generic map(2) port map ("01","10",FAT,mux_fat_op);					--Choosing to add 1 or 2 for the next PC value 
+
 mux_stall_fetch_sel: Mux2 generic map (2) port map(mux_fat_op,"00",stall_fetch,mux_stall_fetch_op);	--Choosing between stall or PC increment	
 added_to_pc<=to_integer(unsigned(mux_stall_fetch_op))+to_integer(unsigned(PC));
 PC_after_add<=std_logic_vector(to_unsigned(added_to_pc,20));
