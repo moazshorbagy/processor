@@ -3,27 +3,27 @@ use ieee.std_logic_1164.all;
 
 ENTITY ControlUnit IS
 PORT   (
-		 WB, MEMWR , SETC , CLC , Z , N : OUT std_logic;
+		 wb, mem_wr , setc , clc , z , n : OUT std_logic;
 		
-		 UNKNOWN1 : OUT std_logic_vector( 2 DOWNTO 0);
+		 alu_op : OUT std_logic_vector( 2 DOWNTO 0);
 		 
-		 REGSRC , ALUSRC2 , OUTPUTENABLE , UNKNOWN2 : OUT std_logic; 
+		 reg_src , alu_src_2 , output_enable , reg_addr_src : OUT std_logic; 
 		 
-		 RESSEL : OUT std_logic_vector( 1 DOWNTO 0);
+		 res_sel : OUT std_logic_vector( 1 DOWNTO 0);
 
-		 DATA2SEL , STALLFETCH , SPEN  : OUT std_logic;
+		 data_2_sel , STALLFETCH , SPEN  : OUT std_logic;
 		 
-		 SPADD , UNKNOWN3 : OUT std_logic_vector( 1 DOWNTO 0);
+		 sp_add , mem_addr_src : OUT std_logic_vector( 1 DOWNTO 0);
 		 
-		 CALL , JZ , JN ,JC ,J ,RET : OUT std_logic;
+		 call , jz , jn ,jc ,j ,ret : OUT std_logic;
 		
-		 OpCode : IN std_logic_vector( 4 DOWNTO 0)
+		 opcode : IN std_logic_vector( 4 DOWNTO 0)
 	);
 
 END ControlUnit;
 
 --NOP   00000
---SETC  00001
+--setc  00001
 --CLRC	00010
 --NOT	00011
 --INC	00100
@@ -83,92 +83,92 @@ constant STDop : std_logic_vector(4 downto 0):= "11110";
 
 
 BEGIN
-WB<= '0' When OpCode = NOPop OR OpCode = SETCop OR OpCode = CLRCop OR OpCode = OUTop OR OpCode = PUSHop OR OpCode = STDop OR OpCode = JZop OR OpCode = JNop OR OpCode = JCop OR OpCode = JMPop OR OpCode = CALLop OR OpCode = RETop OR OpCode = RTIop
+wb<= '0' When opcode = NOPop OR opcode = SETCop OR opcode = CLRCop OR opcode = OUTop OR opcode = PUSHop OR opcode = STDop OR opcode = JZop OR opcode = JNop OR opcode = JCop OR opcode = JMPop OR opcode = CALLop OR opcode = RETop OR opcode = RTIop
 Else '1' ;
 
-MEMWR<= '1' When OpCode = PUSHop OR OpCode = STDop OR OpCode = CALLop
+mem_wr<= '1' When opcode = PUSHop OR opcode = STDop OR opcode = CALLop
 Else '0';
 
-SETC <= '1' When OpCode = SETCop OR OpCode = ADDop OR OpCode = MULop OR OpCode = SUBop OR OpCode = SHLop OR OpCode = SHRop
+setc <= '1' When opcode = SETCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop
 Else '0';
 
-CLC <= '1' When OpCode = CLRCop OR OpCode = ADDop OR OpCode = MULop OR OpCode = SUBop OR OpCode = SHLop OR OpCode = SHRop
+clc <= '1' When opcode = CLRCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop
 Else '0';
 
-Z <= '1' When OpCode = NOTop OR OpCode = INCop OR OpCode = DECop OR OpCode = ADDop OR OpCode = MULop OR OpCode = SUBop OR OpCode = ANDop OR OpCode = ORop  OR OpCode = SHLop OR OpCode = SHRop
+z <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop  OR opcode = SHLop OR opcode = SHRop
 Else '0' ;
 
-N <= '1' When OpCode = NOTop OR OpCode = INCop OR OpCode = DECop OR OpCode = ADDop OR OpCode = MULop OR OpCode = SUBop OR OpCode = ANDop OR OpCode = ORop  OR OpCode = SHLop OR OpCode = SHRop
+n <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop  OR opcode = SHLop OR opcode = SHRop
 Else '0' ;
 
-UNKNOWN1 <= "000" When OpCode = NOTop
-Else "001" When OpCode = INCop OR OpCode = ADDop OR OpCode = MULop
-Else "010" When OpCode = SUBop OR OpCode = DECop
-Else "011" When OpCode = ANDop
-Else "100" When OpCode = ORop
-Else "101" When OpCode = SHLop
-Else "110" When OpCode = SHRop
+alu_op <= "000" When opcode = NOTop
+Else "001" When opcode = INCop OR opcode = ADDop OR opcode = MULop
+Else "010" When opcode = SUBop OR opcode = DECop
+Else "011" When opcode = ANDop
+Else "100" When opcode = ORop
+Else "101" When opcode = SHLop
+Else "110" When opcode = SHRop
 Else "XXX";
 
-REGSRC <= '1' When OpCode = NOTop OR OpCode = INCop OR OpCode = DECop OR OpCode = OUTop OR OpCode = INop OR OpCode = MOVop OR OpCode = ADDop OR OpCode = MULop OR OpCode = SUBop OR OpCode = ANDop OR OpCode = ORop OR OpCode = SHLop OR OpCode = SHRop OR OpCode = LDMop
-Else '0' When OpCode = POPop OR OpCode = LDDop
+reg_src <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = OUTop OR opcode = INop OR opcode = MOVop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop OR opcode = SHLop OR opcode = SHRop OR opcode = LDMop
+Else '0' When opcode = POPop OR opcode = LDDop
 Else 'X';
  
-ALUSRC2 <= '1' When OpCode = INCop OR OpCode = DECop
-Else '0' When OpCode = ADDop OR OpCode = MULop OR OpCode = SUBop OR OpCode = ANDop OR OpCode = ORop OR OpCode = SHLop OR OpCode = SHRop
+alu_src_2 <= '1' When opcode = INCop OR opcode = DECop
+Else '0' When opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop OR opcode = SHLop OR opcode = SHRop
 Else 'X';
 
-OUTPUTENABLE <= '1' When opCode = OUTop
+output_enable <= '1' When opCode = OUTop
 Else '0';
 
 
-UNKNOWN2 <= '1' When opCode = MOVop OR OpCode = ADDop OR OpCode = MULop OR OpCode = SUBop  OR OpCode = ANDop  OR OpCode = ORop
-Else '0' When opCode = NOTop OR OpCode = INCop OR OpCode = DECop OR OpCode = OUTop OR OpCode = INop OR OpCode = SHLop OR OpCode = SHRop OR OpCode = POPop OR OpCode = LDMop OR OpCode = LDDop OR OpCode = STDop
+reg_addr_src <= '1' When opCode = MOVop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop  OR opcode = ANDop  OR opcode = ORop
+Else '0' When opCode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = OUTop OR opcode = INop OR opcode = SHLop OR opcode = SHRop OR opcode = POPop OR opcode = LDMop OR opcode = LDDop OR opcode = STDop
 Else 'X';
 
-RESSEL <= "00" When OpCode = NOTop  OR OpCode = INCop  OR OpCode = DECop OR OpCode = ADDop OR OpCode = MULop OR OpCode = SUBop OR OpCode = ANDop OR OpCode = ORop OR OpCode = SHLop OR OpCode = SHRop
-Else "01" When OpCode = OUTop OR OpCode = MOVop OR OpCode = PUSHop  OR OpCode = STDop
-Else "10" When OpCode = INop
-Else "11" When OpCode = LDMop
+res_sel <= "00" When opcode = NOTop  OR opcode = INCop  OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop OR opcode = SHLop OR opcode = SHRop
+Else "01" When opcode = OUTop OR opcode = MOVop OR opcode = PUSHop  OR opcode = STDop
+Else "10" When opcode = INop
+Else "11" When opcode = LDMop
 Else "XX";
 
-DATA2SEL <= '1' When OpCode = SHLop OR OpCode = SHRop
-Else '0' When OpCode = ADDop OR OpCode = MULop  OR OpCode = SUBop OR OpCode = ANDop OR OpCode = ORop
+data_2_sel <= '1' When opcode = SHLop OR opcode = SHRop
+Else '0' When opcode = ADDop OR opcode = MULop  OR opcode = SUBop OR opcode = ANDop OR opcode = ORop
 Else 'X';
  
-STALLFETCH<= '1' When OpCode = PUSHop OR OpCode = POPop OR OpCode = LDDop OR OpCode = STDop OR OpCode = CALLop OR OpCode = RETop OR OpCode = RTIop
+STALLFETCH<= '1' When opcode = PUSHop OR opcode = POPop OR opcode = LDDop OR opcode = STDop OR opcode = CALLop OR opcode = RETop OR opcode = RTIop
 Else '0' ;
 
-SPEN <= '1' When OpCode = PUSHop OR  OpCode = POPop OR  OpCode = CALLop OR  OpCode = RETop OR  OpCode = RTIop
+SPEN <= '1' When opcode = PUSHop OR  opcode = POPop OR  opcode = CALLop OR  opcode = RETop OR  opcode = RTIop
 Else '0';
 
-SPADD <= "00" When OpCode = PUSHop
-Else "01" When OpCode = POPop
-Else "10" When OpCode = CALLop
-Else "11" When OpCode = RETop OR  OpCode = RTIop
+sp_add <= "00" When opcode = PUSHop
+Else "01" When opcode = POPop
+Else "10" When opcode = CALLop
+Else "11" When opcode = RETop OR  opcode = RTIop
 Else "XX";
 
-UNKNOWN3 <= "01" When OpCode = PUSHop OR  OpCode = CALLop 
-Else "10" When OpCode = LDDop OR  OpCode = STDop 
-Else "11" When OpCode = POPop OR  OpCode = RETop OR  OpCode = RTIop
+mem_addr_src <= "01" When opcode = PUSHop OR  opcode = CALLop 
+Else "10" When opcode = LDDop OR  opcode = STDop 
+Else "11" When opcode = POPop OR  opcode = RETop OR  opcode = RTIop
 Else "00" ;
 
-CALL <= '1' When OpCode = CALLop
+call <= '1' When opcode = CALLop
 Else '0';
 
-JZ <= '1' When OpCode = JZop
+jz <= '1' When opcode = JZop
 Else '0' ; 
 
-JN <= '1' When OpCode = JNop
+jn <= '1' When opcode = JNop
 Else '0' ;
 
-JC <= '1' When OpCode = JCop
+jc <= '1' When opcode = JCop
 Else '0' ;
 
-J<= '1' When OpCode = JMPop
+j<= '1' When opcode = JMPop
 Else '0';
  
-RET<= '1' When OpCode = RETop OR OpCode = RTIop
+ret<= '1' When opcode = RETop OR opcode = RTIop
 Else '0' ;
 
 END CU;
