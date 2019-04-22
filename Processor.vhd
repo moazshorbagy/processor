@@ -25,15 +25,21 @@ architecture structural of Processor is
 		  );
   end component memory;
   
-  component Address_Module is
-    port(
-      stall_fetch: in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
-      FAT: in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
-      address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
-      clk, rst: in std_logic;
-      pc_plus_one: out std_logic_vector(19 downto 0)
-    );
-  end component;
+ component Address_Module is
+port(
+	stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
+	FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
+	address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
+	clk,rst: in std_logic;
+	pc_plus_one: out std_logic_vector(19 downto 0);
+	
+	--Iteration 2...
+	spadd: in std_logic_vector(1 downto 0);
+	EA: in std_logic_vector (19 downto 0);
+	mem_addr_src: in std_logic_vector (1 downto 0)
+
+);
+end component;
   
   component ResolveInstr is
     port(
@@ -185,15 +191,15 @@ signal	E_ret	: std_logic;
 -- begin architecture definition --
 begin
   
-  -- FETCH STAGE
+  ----------------------------------- FETCH STAGE -----------------------------------
   M_write_enable <= '0';
   stall_fetch <= '0';
   W32 <= '0';
   FAT <= mem_out(31) and mem_out(30) and mem_out(29);
-  address_control_unit : Address_Module port map(stall_fetch, FAT, address, clk, reset, F_pc_plus_one);
+  address_control_unit : Address_Module port map(stall_fetch, FAT, address, clk, reset, F_pc_plus_one, "00" , "00000000000000000000", "00");
   memory_unit : Memory port map(clk, M_write_enable, W32, address, write_data, mem_out);
     
-  -- IF/ID Buffer --
+  ----------------------------------- IF/ID Buffer -----------------------------------
   fetch_decode_buffer_enable <= '1';
   if_id_buff: FetchDecodeBuffer port map(F_pc_plus_one, D_pc_plus_one, in_port, D_port, mem_out, D_instr, clk, reset, fetch_decode_buffer_enable);
 
@@ -202,20 +208,20 @@ begin
   
 
   
-  -- DECODE STAGE --
+  ----------------------------------- DECODE STAGE -----------------------------------
 
   WB_write_addr_1 <= "000";
   WB_write_addr_2 <= "001";
   WB_write_data_1 <= "0000000000000001";
   WB_write_data_2 <= "0000000000000010";
-  WB_we_1<='1';
-  WB_we_2 <='1';
+  WB_we_1<='0';
+  WB_we_2 <='0';
  
   splitter: ResolveInstr port map(D_instr, D_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
   register_file_unit: RegFile port map(clk, reset, WB_write_addr_1, WB_write_addr_2, WB_write_data_1, WB_write_data_2, WB_we_1, WB_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
   
   
-   -- ID/Ex Buffer --
+   ----------------------------------- ID/Ex Buffer -----------------------------------
   decode_execute_buffer_enable <= '1';
   id_ex_buff: DecodeExBuffer port map(
 D_pc_src,
