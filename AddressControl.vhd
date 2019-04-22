@@ -8,7 +8,8 @@ port(
 	stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
 	FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
 	address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
-	clk,rst: in std_logic
+	clk,rst: in std_logic;
+	pc_plus_one: out std_logic_vector(19 downto 0)
 );
 end entity;
 
@@ -55,9 +56,6 @@ PC_after_add<=std_logic_vector(to_unsigned(added_to_pc,20));
 address<=PC;
 
 PC_register: Reg generic map(20) port map(clk,rst,'1',PC_after_add,PC);					--Setting the PC to its new value after the CLK
-
-
-
-
+pc_plus_one <= PC_after_add;
 
 end Architecture; 

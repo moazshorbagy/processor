@@ -67,7 +67,7 @@ begin
   read_dec_1: Decoder port map ('1', read_addr_1, read_dec_1_out);
   read_dec_2: Decoder port map ('1', read_addr_2, read_dec_2_out);
   
-  loop1: for i in 0 to n-1 generate
+  loop1: for i in 0 to 7 generate
     reg_write_enable(i) <= write_dec_1_out(i) or write_dec_2_out(i);
     mux_sel(i) <= (write_dec_2_out(i) or (not write_dec_1_out(i)));
     mx: Mux2 generic map (n) port map (write_data_1, write_data_2, mux_sel(i), reg_write_data(i));

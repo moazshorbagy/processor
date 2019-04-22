@@ -10,7 +10,7 @@ ENTITY memory IS
 		clk : IN std_logic;
 		we  : IN std_logic;
 		w32 : IN std_logic;
-		address : IN  std_logic_vector(31 DOWNTO 0);
+		address : IN  std_logic_vector(19 DOWNTO 0);
 		datain  : IN  std_logic_vector(31 DOWNTO 0);
 		dataout : OUT std_logic_vector(31 DOWNTO 0));
 END ENTITY memory;
@@ -34,9 +34,10 @@ ARCHITECTURE memory_architecture OF memory IS
 						END IF;
 					END IF;
 				END IF;
-			data1 <= ram(to_integer(unsigned(address)));
+			
+		END PROCESS;
+		data1 <= ram(to_integer(unsigned(address)));
 			data2 <= ram(to_integer(unsigned(address)+1));
 			dataout <= data1 & data2;
-		END PROCESS;
 		
 END memory_architecture;

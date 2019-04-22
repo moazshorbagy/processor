@@ -7,7 +7,7 @@ PORT(
 	-- ALUC, ALUZ, ALUN : flags coming from the ALU
 	-- setC, clC, ZN : signals coming from the control unit
 	-- C, Z, N : Output flags
-	ALUC, ALUZ, ALUN, setC, clC, ZN, clk, rst: IN std_logic;
+	ALUC, ALUZ, ALUN, setC, clC, ZN, clk, rst, enable: IN std_logic;
 	C, Z, N : OUT std_logic
 );
 
@@ -73,6 +73,6 @@ temp1 <= flag_reg_output(2);
 temp2 <= flag_reg_output(1);
 temp3 <= flag_reg_output(0);
 
-flags_reg : fallingReg generic map (4) port map (clk, rst, '1', flag_reg_input ,flag_reg_output);
+flags_reg : fallingReg generic map (4) port map (clk, rst, enable, flag_reg_input ,flag_reg_output);
 
 END flags_arch;
