@@ -97,6 +97,60 @@ architecture structural of Processor is
   signal id_ex_enable: std_logic;
   signal ex_mem_enable: std_logic;
   signal mem_wb_enable: std_logic;  
+  
+  -- Control Unit Lines --
+  
+signal	D_wb	: std_logic;
+signal	D_mem_wr	: std_logic;
+signal	D_setc	: std_logic;
+signal	D_clc	: std_logic;
+signal	D_z	: std_logic;
+signal	D_n	: std_logic;
+signal	D_alu_op	: std_logic_vector (2 downto 0);
+signal	D_reg_src	: std_logic;
+signal	D_alu_src_2	: std_logic;
+signal	D_output_enable	: std_logic;
+signal	D_reg_addr_src	: std_logic;
+signal	D_res_sel	: std_logic_vector (1 downto 0);
+signal	D_data_2_sel	: std_logic;
+signal	D_stall_fetch	: std_logic;
+signal	D_sp_en	: std_logic;
+signal	D_sp_add	: std_logic_vector (1 downto 0);
+signal	D_mem_addr_src	: std_logic_vector (1 downto 0);
+signal	D_call	: std_logic;
+signal	D_jz	: std_logic;
+signal	D_jn	: std_logic;
+signal	D_jc	: std_logic;
+signal	D_j	: std_logic;
+signal	D_ret	: std_logic;
+
+
+ -- Execute Stage Lines --
+
+signal	E_wb	: std_logic;
+signal	E_mem_wr	: std_logic;
+signal	E_setc	: std_logic;
+signal	E_clc	: std_logic;
+signal	E_z	: std_logic;
+signal	E_n	: std_logic;
+signal	E_alu_op	: std_logic_vector (2 downto 0);
+signal	E_reg_src	: std_logic;
+signal	E_alu_src_2	: std_logic;
+signal	E_output_enable	: std_logic;
+signal	E_reg_addr_src	: std_logic;
+signal	E_res_sel	: std_logic_vector (1 downto 0);
+signal	E_data_2_sel	: std_logic;
+signal	E_stall_fetch	: std_logic;
+signal	E_sp_en	: std_logic;
+signal	E_sp_add	: std_logic_vector (1 downto 0);
+signal	E_mem_addr_src	: std_logic_vector (1 downto 0);
+signal	E_call	: std_logic;
+signal	E_jz	: std_logic;
+signal	E_jn	: std_logic;
+signal	E_jc	: std_logic;
+signal	E_j	: std_logic;
+signal	E_ret	: std_logic;
+
 
 -- begin architecture definition --
 begin
