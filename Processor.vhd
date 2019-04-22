@@ -72,6 +72,25 @@ architecture structural of Processor is
       clk, rst, enable : IN std_logic
     );
   end component;
+  
+  component DecodeExBuffer IS
+PORT(
+	PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
+	PCSrc_next, RET_next, ZN_next, setC_next, clC_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
+	memAddrSrc_prev,  SPAdd_prev, resSel_prev : IN std_logic_vector (1 downto 0 );
+	memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
+	Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
+	Data1_next, Data2_next, Port_next : OUT std_logic_vector (15 downto 0);
+	addr2_prev, RegAddr_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
+	addr2_next, RegAddr_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
+	EA_prev : IN std_logic_vector ( 19 downto 0);
+	EA_next : OUT std_logic_vector ( 19 downto 0);
+	PC_flags_prev : IN std_logic_vector (31 downto 0);
+	PC_flags_next : OUT std_logic_vector (31 downto 0);
+	clk, rst, enable : IN std_logic
+);
+
+END component;
 
 -- types declaration --
 
@@ -85,15 +104,27 @@ architecture structural of Processor is
   
   -- Decode stage signals --
   signal D_pc_plus_one, D_eff_addr: std_logic_vector (19 downto 0);
-  signal D_port, D_mem_data, D_read_data_1, D_read_data_2, D_write_data_1, D_write_data_2: std_logic_vector (15 downto 0);
+  signal D_port, D_mem_data, D_read_data_1, D_read_data_2 : std_logic_vector (15 downto 0);
   signal D_instr: std_logic_vector (31 downto 0);
   signal D_op_code: std_logic_vector (4 downto 0);
   signal D_shift_val:  std_logic_vector (3 downto 0);
-  signal D_read_addr_1, D_read_addr_2, D_write_addr_1, D_write_addr_2: std_logic_vector (2 downto 0);
+  signal D_read_addr_1, D_read_addr_2, D_write_addr_1, D_write_addr_2, D_reg_addr : std_logic_vector (2 downto 0);
   signal D_we_1, D_we_2: std_logic;
+  signal D_pc_plus_one_flags: std_logic_vector (31 downto 0);
+  
+  -- Execute stage signals --
+  signal  E_port, E_read_data_1, E_read_data_2 : std_logic_vector (15 downto 0);
+  signal E_read_addr_2,	E_reg_addr : std_logic_vector (2 downto 0);
+  signal E_eff_addr : std_logic_vector (19 downto 0);
+   signal E_pc_plus_one_flags: std_logic_vector (31 downto 0);
+
+
+
+
   
   -- Buffer enables --
   signal fetch_decode_buffer_enable: std_logic;
+  signal decode_execute_buffer_enable: std_logic;
   signal id_ex_enable: std_logic;
   signal ex_mem_enable: std_logic;
   signal mem_wb_enable: std_logic;  
@@ -104,8 +135,7 @@ signal	D_wb	: std_logic;
 signal	D_mem_wr	: std_logic;
 signal	D_setc	: std_logic;
 signal	D_clc	: std_logic;
-signal	D_z	: std_logic;
-signal	D_n	: std_logic;
+signal	D_zn	: std_logic;
 signal	D_alu_op	: std_logic_vector (2 downto 0);
 signal	D_reg_src	: std_logic;
 signal	D_alu_src_2	: std_logic;
@@ -117,11 +147,8 @@ signal	D_stall_fetch	: std_logic;
 signal	D_sp_en	: std_logic;
 signal	D_sp_add	: std_logic_vector (1 downto 0);
 signal	D_mem_addr_src	: std_logic_vector (1 downto 0);
+signal	D_pc_src	: std_logic;
 signal	D_call	: std_logic;
-signal	D_jz	: std_logic;
-signal	D_jn	: std_logic;
-signal	D_jc	: std_logic;
-signal	D_j	: std_logic;
 signal	D_ret	: std_logic;
 
 
@@ -131,8 +158,7 @@ signal	E_wb	: std_logic;
 signal	E_mem_wr	: std_logic;
 signal	E_setc	: std_logic;
 signal	E_clc	: std_logic;
-signal	E_z	: std_logic;
-signal	E_n	: std_logic;
+signal	E_zn	: std_logic;
 signal	E_alu_op	: std_logic_vector (2 downto 0);
 signal	E_reg_src	: std_logic;
 signal	E_alu_src_2	: std_logic;
@@ -144,12 +170,16 @@ signal	E_stall_fetch	: std_logic;
 signal	E_sp_en	: std_logic;
 signal	E_sp_add	: std_logic_vector (1 downto 0);
 signal	E_mem_addr_src	: std_logic_vector (1 downto 0);
+signal	E_pc_src	: std_logic;
 signal	E_call	: std_logic;
-signal	E_jz	: std_logic;
-signal	E_jn	: std_logic;
-signal	E_jc	: std_logic;
-signal	E_j	: std_logic;
 signal	E_ret	: std_logic;
+
+
+ -- Write back signals --
+ 
+ signal WB_write_addr_1, WB_write_addr_2: STD_LOGIC_VECTOR (2 downto 0);
+ signal WB_write_data_1, WB_write_data_2: STD_LOGIC_VECTOR (15 downto 0);
+ signal WB_we_1, WB_we_2 : STD_LOGIC; 
 
 
 -- begin architecture definition --
@@ -166,16 +196,80 @@ begin
   -- IF/ID Buffer --
   fetch_decode_buffer_enable <= '1';
   if_id_buff: FetchDecodeBuffer port map(F_pc_plus_one, D_pc_plus_one, in_port, D_port, mem_out, D_instr, clk, reset, fetch_decode_buffer_enable);
+
+
+ 
+  
+
   
   -- DECODE STAGE --
-  D_write_addr_1 <= (others => '0');
-  D_write_addr_2 <= (others => '1');
-  D_write_data_1 <= (others => '1');
-  D_write_data_2 <= (4 => '1', others => '0');
-  D_we_1 <= '1';
-  D_we_2 <= '1';
+
+  WB_write_addr_1 <= "000";
+  WB_write_addr_2 <= "001";
+  WB_write_data_1 <= "0000000000000001";
+  WB_write_data_2 <= "0000000000000010";
+  WB_we_1<='1';
+  WB_we_2 <='1';
+ 
   splitter: ResolveInstr port map(D_instr, D_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
-  register_file_unit: RegFile port map(clk, reset, D_write_addr_1, D_write_addr_2, D_write_data_1, D_write_data_2, D_we_1, D_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
+  register_file_unit: RegFile port map(clk, reset, WB_write_addr_1, WB_write_addr_2, WB_write_data_1, WB_write_data_2, WB_we_1, WB_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
+  
+  
+   -- ID/Ex Buffer --
+  decode_execute_buffer_enable <= '1';
+  id_ex_buff: DecodeExBuffer port map(
+D_pc_src,
+D_ret,
+D_zn,
+D_setc,
+D_clc,
+D_mem_wr,
+D_wb,
+D_stall_fetch,
+D_sp_en,
+D_call,
+D_reg_src,
+D_alu_src_2,
+D_output_enable,
+E_pc_src,
+E_ret,
+E_zn,
+E_setc,
+E_clc,
+E_mem_wr,
+E_wb,
+E_stall_fetch,
+E_sp_en,
+E_call,
+E_reg_src,
+E_alu_src_2,
+E_output_enable,
+D_mem_addr_src,	
+D_sp_add,	
+D_res_sel,
+E_mem_addr_src,	
+E_sp_add,	
+E_res_sel,
+D_read_data_1,	
+D_read_data_2,
+D_port,
+E_read_data_1,	
+E_read_data_2,
+E_port,
+D_read_addr_2,
+D_reg_addr,	
+D_alu_op,
+E_read_addr_2,	
+E_reg_addr,	
+E_alu_op,
+D_eff_addr,
+E_eff_addr,
+D_pc_plus_one_flags,		
+E_pc_plus_one_flags,	
+clk,
+reset,
+decode_execute_buffer_enable
+  );
 end architecture;
 
 

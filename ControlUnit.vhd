@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 ENTITY ControlUnit IS
 PORT   (
-		 wb, mem_wr , setc , clc , z , n : OUT std_logic;
+		 wb, mem_wr , setc , clc , zn : OUT std_logic;
 		
 		 alu_op : OUT std_logic_vector( 2 DOWNTO 0);
 		 
@@ -11,13 +11,16 @@ PORT   (
 		 
 		 res_sel : OUT std_logic_vector( 1 DOWNTO 0);
 
-		 data_2_sel , STALLFETCH , SPEN  : OUT std_logic;
+		 data_2_sel , stall_fetch , SPEN  : OUT std_logic;
 		 
 		 sp_add , mem_addr_src : OUT std_logic_vector( 1 DOWNTO 0);
 		 
-		 call , jz , jn ,jc ,j ,ret : OUT std_logic;
+		 pc_src ,call,ret: OUT std_logic;
 		
-		 opcode : IN std_logic_vector( 4 DOWNTO 0)
+		 c_flag, n_flag, z_flag: IN std_logic;
+		
+	 	 opcode : IN std_logic_vector( 4 DOWNTO 0)
+		 
 	);
 
 END ControlUnit;
@@ -81,6 +84,7 @@ constant LDMop : std_logic_vector(4 downto 0):= "11100";
 constant LDDop : std_logic_vector(4 downto 0):= "11101"; 
 constant STDop : std_logic_vector(4 downto 0):= "11110"; 
 
+signal  jz , jn ,jc ,j,callsig  :  std_logic;
 
 BEGIN
 wb<= '0' When opcode = NOPop OR opcode = SETCop OR opcode = CLRCop OR opcode = OUTop OR opcode = PUSHop OR opcode = STDop OR opcode = JZop OR opcode = JNop OR opcode = JCop OR opcode = JMPop OR opcode = CALLop OR opcode = RETop OR opcode = RTIop
@@ -95,11 +99,9 @@ Else '0';
 clc <= '1' When opcode = CLRCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop
 Else '0';
 
-z <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop  OR opcode = SHLop OR opcode = SHRop
+zn <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop  OR opcode = SHLop OR opcode = SHRop
 Else '0' ;
 
-n <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop  OR opcode = SHLop OR opcode = SHRop
-Else '0' ;
 
 alu_op <= "000" When opcode = NOTop
 Else "001" When opcode = INCop OR opcode = ADDop OR opcode = MULop
@@ -136,7 +138,7 @@ data_2_sel <= '1' When opcode = SHLop OR opcode = SHRop
 Else '0' When opcode = ADDop OR opcode = MULop  OR opcode = SUBop OR opcode = ANDop OR opcode = ORop
 Else 'X';
  
-STALLFETCH<= '1' When opcode = PUSHop OR opcode = POPop OR opcode = LDDop OR opcode = STDop OR opcode = CALLop OR opcode = RETop OR opcode = RTIop
+stall_fetch<= '1' When opcode = PUSHop OR opcode = POPop OR opcode = LDDop OR opcode = STDop OR opcode = CALLop OR opcode = RETop OR opcode = RTIop
 Else '0' ;
 
 SPEN <= '1' When opcode = PUSHop OR  opcode = POPop OR  opcode = CALLop OR  opcode = RETop OR  opcode = RTIop
@@ -153,7 +155,7 @@ Else "10" When opcode = LDDop OR  opcode = STDop
 Else "11" When opcode = POPop OR  opcode = RETop OR  opcode = RTIop
 Else "00" ;
 
-call <= '1' When opcode = CALLop
+callsig <= '1' When opcode = CALLop
 Else '0';
 
 jz <= '1' When opcode = JZop
@@ -170,5 +172,11 @@ Else '0';
  
 ret<= '1' When opcode = RETop OR opcode = RTIop
 Else '0' ;
+
+
+pc_src <= callsig or j or (z_flag and jz) or (n_flag and jn) or (c_flag and jc);
+
+call <= callsig;
+
 
 END CU;
