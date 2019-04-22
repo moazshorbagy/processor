@@ -2,7 +2,7 @@
 Library ieee;
 use ieee.std_logic_1164.all;
 USE IEEE.numeric_std.all;
-USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+
 entity Address_Module is
 port(
 	stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
@@ -39,6 +39,7 @@ sel : in  std_logic_vector (1 downto 0);
 out1 : out std_logic_vector (n-1 downto 0));
 end component;
 
+signal current_address:std_logic_vector (19 downto 0);							--Current address that will be accessed in memory
 signal mux_fat_op: std_logic_vector (1 downto 0);							--Output of mux that selects between PC +1 or +2
 signal mux_stall_fetch_op: std_logic_vector (1 downto 0);						--Output of mux that selects between PC +1/+2 or +0 .
 Signal added_to_PC: Integer;
@@ -53,7 +54,6 @@ added_to_pc<=to_integer(unsigned(mux_stall_fetch_op))+to_integer(unsigned(PC));
 PC_after_add<=std_logic_vector(to_unsigned(added_to_pc,20));
 address<=PC;
 
---Sequential part (Assigning to PC it's new value)
 PC_register: Reg generic map(20) port map(clk,rst,'1',PC_after_add,PC);					--Setting the PC to its new value after the CLK
 
 
