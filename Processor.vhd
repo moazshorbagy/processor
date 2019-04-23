@@ -14,6 +14,7 @@ architecture structural of Processor is
   
 -- components declaration --
 
+
   component memory is
     port(
       clk : IN std_logic;
@@ -98,6 +99,48 @@ PORT(
 
 END component;
 
+
+component ALU is	
+generic (m: integer:=16);   		   			--Made it generic incase we changed something in design
+port (
+	Data1,Data2:in std_logic_vector(m-1 downto 0);		--Based on ALU_OP we might not use both of the data in ports	
+	alu_op:in std_logic_vector(2 downto 0);			--8 Operations
+	Res1,Res2: out std_logic_vector (m-1 downto 0); 	--Res2 is only used for multiplication, else it will be set to don't care
+	C,N,Z:out std_logic);					--Carry, Negative,Zero
+end component;
+
+component flags is 
+
+PORT(
+	-- ALUC, ALUZ, ALUN : flags coming from the ALU
+	-- setC, clC, ZN : signals coming from the control unit
+	-- C, Z, N : Output flags
+	ALUC, ALUZ, ALUN, setC, clC, ZN, clk, rst, enable: IN std_logic;
+	C, Z, N : OUT std_logic
+);
+
+
+END component;
+
+
+COMPONENT mux4 is 
+generic (n : integer:=16);
+port(
+in0, in1, in2, in3: in std_logic_vector (n-1 downto 0);
+sel : in  std_logic_vector (1 downto 0);
+out1 : out std_logic_vector (n-1 downto 0));
+end COMPONENT;
+
+
+COMPONENT Mux2 is
+	generic (n: integer:=16);
+	port (
+    in_0, in_1: in std_logic_vector (n-1 downto 0);
+    sel: in std_logic;
+		out_1: out std_logic_vector (n-1 downto 0));
+end COMPONENT;
+
+
 -- types declaration --
 
   
@@ -134,6 +177,8 @@ END component;
   signal id_ex_enable: std_logic;
   signal ex_mem_enable: std_logic;
   signal mem_wb_enable: std_logic;  
+
+  signal flags_regs_enable : std_logic;
   
   -- Control Unit Lines --
   
@@ -179,6 +224,16 @@ signal	E_mem_addr_src	: std_logic_vector (1 downto 0);
 signal	E_pc_src	: std_logic;
 signal	E_call	: std_logic;
 signal	E_ret	: std_logic;
+signal E_res : std_logic_vector (15 downto 0);
+signal E_res2 : std_logic_vector ( 15 downto 0);
+signal E_ALU_C: std_logic;
+signal E_ALU_Z : std_logic;
+signal E_ALU_N : std_logic;
+signal E_N : std_logic;
+signal E_Z : std_logic;
+signal E_C : std_logic;
+signal E_ALU_operand_2 : std_logic_vector(15 downto 0);
+signal E_ALU_res : std_logic_vector(15 downto 0);
 
 
  -- Write back signals --
@@ -276,6 +331,20 @@ clk,
 reset,
 decode_execute_buffer_enable
   );
+
+----------------------------------- Execute Stage -----------------------------------
+ 
+  ALU_src_2_mux : Mux2 generic map (16) port map(E_read_data_2, "0000000000000001",E_alu_src_2, E_ALU_operand_2);
+  D_ALU_component :  ALU generic map (16) port map (E_read_data_1, E_ALU_operand_2, E_alu_op, E_ALU_res, E_res2, E_ALU_C, E_ALU_N, E_ALU_Z);
+
+  -- The flags module getting input from the ALU and the control unit
+  flags_regs_enable <= '1';
+  D_flags_component : flags port map (E_ALU_C, E_ALU_Z, E_ALU_N, E_setc, E_clc, E_zn, clk, reset, flags_regs_enable, E_C, E_Z, E_N);
+
+  -- The mux selecting res from ALU, DATA1, PORT, and Immediate data
+  res_mux : mux4 generic map (16) port map (E_ALU_res, E_read_data_1, E_port, E_eff_addr(15 downto 0), E_res_sel, E_res);
+
+
 end architecture;
 
 
