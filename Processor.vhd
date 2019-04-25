@@ -137,19 +137,22 @@ PORT   (
 END component;
 
 
-  component Address_Module is
-    port(
-      stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
-      FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
-      address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
-      clk,rst: in std_logic;
-      pc_plus_one: out std_logic_vector(19 downto 0);
-      --Iteration 2...
-      spadd: in std_logic_vector(1 downto 0);
-      EA: in std_logic_vector (19 downto 0);
-      mem_addr_src: in std_logic_vector (1 downto 0)
-    );
-  end component;
+  component  Address_Module is
+port(
+	stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
+	FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
+
+	clk,rst: in std_logic;
+	
+	--Iteration 2...
+	spadd: in std_logic_vector(1 downto 0);
+	EA: in std_logic_vector (19 downto 0);
+	mem_addr_src: in std_logic_vector (1 downto 0);
+	spen: in std_logic;
+	address: out std_logic_vector(19 downto 0)		--PC value or SP value or EA or SP+1..
+
+);
+end component;
 
   component ResolveInstr is
     port(
@@ -198,7 +201,7 @@ END component;
   -- Fetch stage signals --
   signal address, F_pc_plus_one: std_logic_vector (19 downto 0);
   signal write_data, mem_out : std_logic_vector (31 downto 0);
-  signal W32, M_write_enable, stall_fetch, FAT: std_logic ;
+  signal W32, M_write_enable, stall_fetch, FAT,sp_en: std_logic ;
   
   -- Decode stage signals --
   signal D_pc_plus_one, D_eff_addr: std_logic_vector (19 downto 0);
@@ -319,7 +322,9 @@ begin
   stall_fetch <= '0';
   W32 <= '0';
   FAT <= mem_out(31) and mem_out(30) and mem_out(29);
-  address_control_unit : Address_Module port map(stall_fetch, FAT, address, clk, reset, F_pc_plus_one, "00" , "00000000000000000000", "00");
+  
+
+  address_control_unit : Address_Module port map(stall_fetch, FAT, clk, reset, "00" , "00000000000000000000", "00",sp_en,address);
   memory_unit : Memory port map(clk, M_write_enable, W32, address, write_data, mem_out);
     
   ----------------------------------- IF/ID Buffer -----------------------------------
