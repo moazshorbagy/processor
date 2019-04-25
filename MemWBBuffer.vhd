@@ -3,8 +3,8 @@ USE IEEE.std_logic_1164.all;
 
 ENTITY MemWBBuffer IS
 PORT(
-	WB_prev, NOP_prev, RegSrc_prev, outEnable_prev : IN std_logic;
-	WB_next, NOP_next, RegSrc_next, outEnable_next : OUT std_logic;
+	WB_prev, WB2_prev, NOP_prev, RegSrc_prev, outEnable_prev : IN std_logic;
+	WB_next, WB2_next, NOP_next, RegSrc_next, outEnable_next : OUT std_logic;
 	res2_prev, res_prev : IN std_logic_vector(15 downto 0);
 	res2_next, res_next : OUT std_logic_vector(15 downto 0);
 	RegAddr_prev, RegAddr2_prev : IN std_logic_vector ( 2 downto 0);
@@ -38,6 +38,7 @@ end COMPONENT;
 BEGIN
 
 WB_buffer : fallingReg1Bit  port map (clk, rst, enable, WB_prev, WB_next);
+WB2_buffer : fallingReg1Bit  port map (clk, rst, enable, WB2_prev, WB2_next);
 NOP_buffer : fallingReg1Bit port map (clk, rst, enable, NOP_prev, NOP_next);
 RegSrc_buffer : fallingReg1Bit port map (clk, rst, enable, RegSrc_prev, RegSrc_next);
 outEnable_buffer : fallingReg1Bit port map (clk, rst, enable, outEnable_prev, outEnable_next);

@@ -60,53 +60,57 @@ architecture structural of Processor is
       clk, rst, enable : IN std_logic
     );
   end component;
-  
-  component DecodeExBuffer IS
-    PORT(
-      PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
-      PCSrc_next, RET_next, ZN_next, setC_next, clC_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
-      memAddrSrc_prev,  SPAdd_prev, resSel_prev : IN std_logic_vector (1 downto 0 );
-      memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
-      Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
-      Data1_next, Data2_next, Port_next : OUT std_logic_vector (15 downto 0);
-      addr2_prev, RegAddr_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
-      addr2_next, RegAddr_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
-      EA_prev : IN std_logic_vector ( 19 downto 0);
-      EA_next : OUT std_logic_vector ( 19 downto 0);
-      PC_flags_prev : IN std_logic_vector (31 downto 0);
-      PC_flags_next : OUT std_logic_vector (31 downto 0);
-      clk, rst, enable : IN std_logic
-    );
-  END component;
+ 
+
+ component DecodeExBuffer IS
+PORT(
+	PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev, MemW_prev, WB_prev, WB2_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
+	PCSrc_next, RET_next, ZN_next, setC_next, clC_next, MemW_next, WB_next, WB2_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
+	memAddrSrc_prev,  SPAdd_prev, resSel_prev : IN std_logic_vector (1 downto 0 );
+	memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
+	Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
+	Data1_next, Data2_next, Port_next : OUT std_logic_vector (15 downto 0);
+	addr2_prev, RegAddr_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
+	addr2_next, RegAddr_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
+	EA_prev : IN std_logic_vector ( 19 downto 0);
+	EA_next : OUT std_logic_vector ( 19 downto 0);
+	PC_flags_prev : IN std_logic_vector (31 downto 0);
+	PC_flags_next : OUT std_logic_vector (31 downto 0);
+	clk, rst, enable : IN std_logic
+);
+
+END component;
   
   COMPONENT ExecuteMemBuffer IS
     PORT(
-      RET_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, outEnable_prev : IN std_logic;
-      RET_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, outEnable_next : OUT std_logic;
-      memAddrSrc_prev,  SPAdd_prev : IN std_logic_vector (1 downto 0 );
-      memAddrSrc_next,  SPAdd_next : OUT std_logic_vector (1 downto 0 );
-      res1_prev, res2_prev : IN std_logic_vector (15 downto 0);
-      res1_next, res2_next : OUT std_logic_vector (15 downto 0);
-      addr2_prev, RegAddr_prev : IN std_logic_vector ( 2 downto 0);
-      addr2_next, RegAddr_next : OUT std_logic_vector ( 2 downto 0);
-      EA_prev : IN std_logic_vector ( 19 downto 0);
-      EA_next : OUT std_logic_vector ( 19 downto 0);
-      PC_flags_prev : IN std_logic_vector (31 downto 0);	--PC+1 & flags
-      PC_flags_next : OUT std_logic_vector (31 downto 0);
-      clk, rst, enable : IN std_logic
-    );
+
+	RET_prev, MemW_prev, WB_prev, WB2_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, outEnable_prev : IN std_logic;
+	RET_next, MemW_next, WB_next, WB2_next, stallFetch_next, SPEn_next, call_next, regSrc_next, outEnable_next : OUT std_logic;
+	memAddrSrc_prev,  SPAdd_prev : IN std_logic_vector (1 downto 0 );
+	memAddrSrc_next,  SPAdd_next : OUT std_logic_vector (1 downto 0 );
+	res1_prev, res2_prev : IN std_logic_vector (15 downto 0);
+	res1_next, res2_next : OUT std_logic_vector (15 downto 0);
+	addr2_prev, RegAddr_prev : IN std_logic_vector ( 2 downto 0);
+	addr2_next, RegAddr_next : OUT std_logic_vector ( 2 downto 0);
+	EA_prev : IN std_logic_vector ( 19 downto 0);
+	EA_next : OUT std_logic_vector ( 19 downto 0);
+	PC_flags_prev : IN std_logic_vector (31 downto 0);	--PC+1 & flags
+	PC_flags_next : OUT std_logic_vector (31 downto 0);
+	clk, rst, enable : IN std_logic
+);
   END COMPONENT;
 
   COMPONENT MemWBBuffer IS
     PORT(
-      WB_prev, NOP_prev, RegSrc_prev, outEnable_prev : IN std_logic;
-      WB_next, NOP_next, RegSrc_next, outEnable_next : OUT std_logic;
-      res2_prev, res_prev : IN std_logic_vector(15 downto 0);
-      res2_next, res_next : OUT std_logic_vector(15 downto 0);
-      RegAddr_prev, RegAddr2_prev : IN std_logic_vector ( 2 downto 0);
-      RegAddr_next, RegAddr2_next : OUT std_logic_vector ( 2 downto 0);
-      clk, rst, enable : IN std_logic
-    );
+	WB_prev, WB2_prev, NOP_prev, RegSrc_prev, outEnable_prev : IN std_logic;
+	WB_next, WB2_next, NOP_next, RegSrc_next, outEnable_next : OUT std_logic;
+	res2_prev, res_prev : IN std_logic_vector(15 downto 0);
+	res2_next, res_next : OUT std_logic_vector(15 downto 0);
+	RegAddr_prev, RegAddr2_prev : IN std_logic_vector ( 2 downto 0);
+	RegAddr_next, RegAddr2_next : OUT std_logic_vector ( 2 downto 0);
+	clk, rst, enable : IN std_logic
+);
+
   END COMPONENT;
 
 -- Extra components --
@@ -233,6 +237,7 @@ end component;
   -- Control Unit Lines --
   
   signal	D_wb	: std_logic;
+  signal	D_wb2	: std_logic;
   signal	D_mem_wr	: std_logic;
   signal	D_setc	: std_logic;
   signal	D_clc	: std_logic;
@@ -256,6 +261,7 @@ end component;
  -- Execute Stage Lines --
 
   signal	E_wb	: std_logic;
+  signal	E_wb2	: std_logic;
   signal	E_mem_wr	: std_logic;
   signal	E_setc	: std_logic;
   signal	E_clc	: std_logic;
@@ -289,6 +295,7 @@ end component;
   -- Memory Stage Lines --
 
   signal	M_wb	: std_logic;
+  signal	M_wb2	: std_logic;
   signal	M_mem_wr	: std_logic;
   signal	M_reg_src	: std_logic;
   signal	M_output_enable	: std_logic;
@@ -303,29 +310,42 @@ end component;
   signal	M_ret	: std_logic;
   signal 	M_res : std_logic_vector (15 downto 0);
   signal 	M_res2 : std_logic_vector ( 15 downto 0);
-  signal 	M_read_addr_2,	M_reg_addr : std_logic_vector (2 downto 0);
+  signal 	M_read_addr_2 : std_logic_vector (2 downto 0);
+  signal 	M_reg_addr : std_logic_vector (2 downto 0);
   signal 	M_eff_addr : std_logic_vector (19 downto 0);
   signal	M_pc_plus_one_flags: std_logic_vector (31 downto 0);
+  signal 	M_write_data : std_logic_vector ( 31 downto 0);
+  signal 	M_res_extended : std_logic_vector ( 31 downto 0);
 
  -- Write back signals --
  
   signal WB_write_addr_1, WB_write_addr_2: STD_LOGIC_VECTOR (2 downto 0);
-  signal WB_write_data_1, WB_write_data_2, WB_res: STD_LOGIC_VECTOR (15 downto 0);
-  signal WB_we_1, WB_we_2 : STD_LOGIC; 
+  signal WB_write_data_1, WB_write_data_2: STD_LOGIC_VECTOR (15 downto 0);
+  signal WB_we_1: STD_LOGIC; 
+  signal WB_we_2 : STD_LOGIC; 
 
-  
+  signal WB_NOP : std_logic ;
+  signal WB_reg_src : std_logic;
+  signal WB_output_enable : std_logic;
+  signal WB_res2 : std_logic_vector (15 downto 0);
+  signal WB_res : std_logic_vector (15 downto 0);
+  signal WB_reg_addr : std_logic_vector (2 downto 0);
+  signal WB_reg_addr2 : std_logic_vector (2 downto 0);
+
+
 -- begin architecture definition --
 begin
   
   ----------------------------------- FETCH STAGE -----------------------------------
   M_write_enable <= '0';
   stall_fetch <= '0';
-  W32 <= '0';
+  W32 <= M_call;
   FAT <= mem_out(31) and mem_out(30) and mem_out(29);
-  
+  M_res_extended <= "0000000000000000" & M_res;
+  Mux_M_write_data : Mux2 generic map (32) port map (M_res_extended, M_pc_plus_one_flags, M_call, M_write_data );
 
-  address_control_unit : Address_Module port map(stall_fetch, FAT, clk, reset, "00" , "00000000000000000000", "00",sp_en,address);
-  memory_unit : Memory port map(clk, M_write_enable, W32, address, write_data, mem_out);
+  address_control_unit : Address_Module port map(M_stall_fetch, FAT, clk, reset, M_sp_add , M_eff_addr, M_mem_addr_src, M_sp_en,address);
+  memory_unit : Memory port map(clk, M_write_enable, W32, address, M_write_data, mem_out);
     
   ----------------------------------- IF/ID Buffer -----------------------------------
   fetch_decode_buffer_enable <= '1';
@@ -338,13 +358,10 @@ begin
   
   ----------------------------------- DECODE STAGE -----------------------------------
 
-  WB_write_addr_1 <= "000";
-  WB_write_addr_2 <= "001";
-  WB_write_data_2 <= "0000000000000010";
-  WB_we_1<='0';
-  WB_we_2 <='0';
-
+  
   splitter: ResolveInstr port map(D_instr, D_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
+
+  D_wb2 <= '0';
 
   reg_src_mux: Mux2 generic map (16) port map(D_mem_data, WB_res, D_reg_src, WB_write_data_1);
   reg_addr_src_mux: Mux2 generic map (3) port map(D_read_addr_1, D_read_addr_2, D_reg_addr_src, D_reg_addr);
@@ -363,6 +380,7 @@ begin
     D_clc,
     D_mem_wr,
     D_wb,
+    D_wb2,
     D_stall_fetch,
     D_sp_en,
     D_call,
@@ -376,6 +394,7 @@ begin
     E_clc,
     E_mem_wr,
     E_wb,
+    E_wb2,
     E_stall_fetch,
     E_sp_en,
     E_call,
@@ -427,8 +446,8 @@ begin
 	D_mem_addr_src,	 D_pc_src ,D_call,D_ret, E_C, E_N, E_Z, D_op_code);
 
 --------------------------------- Execute Memory Buffer ----------------------------
- ExecuteMemoryBuffer :  ExecuteMemBuffer port map (	E_ret, E_mem_wr, E_wb, E_stall_fetch, E_sp_en, E_call, E_reg_src, E_output_enable,
-							M_ret, M_mem_wr, M_wb, M_stall_fetch, M_sp_en, M_call, M_reg_src, M_output_enable,
+ ExecuteMemoryBuffer :  ExecuteMemBuffer port map (	E_ret, E_mem_wr, E_wb, E_wb2, E_stall_fetch, E_sp_en, E_call, E_reg_src, E_output_enable,
+							M_ret, M_mem_wr, M_wb, M_wb2, M_stall_fetch, M_sp_en, M_call, M_reg_src, M_output_enable,
 							E_mem_addr_src, E_sp_add,
 							M_mem_addr_src, M_sp_add,
 							E_res, E_res2,
@@ -441,6 +460,22 @@ begin
 							M_pc_plus_one_flags,
 							clk, reset, ex_mem_enable);
 
---------------------------------- Memory Write-Back Buffer ----------------------------
+--------------------------------- Memory Write-Back Buffer ----------------------------  
+  mem_wb_enable <= '1';
+  Mem_WB_Buffer : MemWBBuffer port map (M_wb, M_wb2,  M_stall_fetch, M_reg_src, M_output_enable,
+					WB_we_1, WB_we_2, WB_NOP, WB_reg_src, WB_output_enable,
+					M_res2, M_res,
+					WB_res2, WB_res,
+					M_reg_addr, M_read_addr_2,
+					WB_reg_addr, WB_reg_addr2,
+					clk, reset, mem_wb_enable);
+
+  WB_write_data_1 <= WB_res;
+  WB_write_data_2 <= WB_res2;
+  WB_write_addr_1 <= WB_reg_addr;
+  WB_write_addr_2 <= WB_reg_addr2;
+
+
+
 
 end architecture;

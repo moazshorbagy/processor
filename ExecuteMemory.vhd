@@ -4,8 +4,8 @@ USE IEEE.std_logic_1164.all;
 ENTITY ExecuteMemBuffer IS
 PORT(
 
-	RET_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, outEnable_prev : IN std_logic;
-	RET_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, outEnable_next : OUT std_logic;
+	RET_prev, MemW_prev, WB_prev, WB2_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, outEnable_prev : IN std_logic;
+	RET_next, MemW_next, WB_next, WB2_next, stallFetch_next, SPEn_next, call_next, regSrc_next, outEnable_next : OUT std_logic;
 	memAddrSrc_prev,  SPAdd_prev : IN std_logic_vector (1 downto 0 );
 	memAddrSrc_next,  SPAdd_next : OUT std_logic_vector (1 downto 0 );
 	res1_prev, res2_prev : IN std_logic_vector (15 downto 0);
@@ -47,6 +47,7 @@ BEGIN
 RET_reg : Reg1bit  port map (clk, rst, enable, RET_prev, RET_next);
 MemW_reg : Reg1bit  port map (clk, rst, enable, MemW_prev, MemW_next);
 WB_reg : Reg1bit  port map (clk, rst, enable, WB_prev, WB_next);
+WB2_reg : Reg1bit  port map (clk, rst, enable, WB2_prev, WB2_next);
 stallFetch_reg : Reg1bit  port map (clk, rst, enable, stallFetch_prev, stallFetch_next);
 SPEn_reg : Reg1bit  port map (clk, rst, enable, SPEn_prev, SPEn_next);
 call_reg : Reg1bit  port map (clk, rst, enable, call_prev, call_next);
