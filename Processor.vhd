@@ -479,6 +479,9 @@ begin
   WB_write_data_2 <= WB_res2;
   WB_write_addr_1 <= WB_reg_addr;
   WB_write_addr_2 <= WB_reg_addr2;
+	-------- I guess it will be changed but leve it for now -------------
+  out_port <= WB_res when WB_output_enable = '1'
+		else "0000000000000000";
 
 
 
