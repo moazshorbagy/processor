@@ -1,7 +1,7 @@
 LIBRARY IEEE;
 USE IEEE.std_logic_1164.all;
 
-ENTITY DecodeExBuffer IS
+ENTITY ExecuteMemBuffer IS
 PORT(
 
 	RET_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, outEnable_prev : IN std_logic;
@@ -22,7 +22,7 @@ PORT(
 END ENTITY;
 
 
-ARCHITECTURE arch of DecodeExBuffer  IS
+ARCHITECTURE arch of ExecuteMemBuffer  IS
 
 COMPONENT Reg is
 generic(n: integer:=16);
