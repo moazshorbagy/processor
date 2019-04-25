@@ -1,16 +1,4 @@
 vsim -gui work.processor
-# vsim -gui work.processor 
-# Loading std.standard
-# Loading std.textio(body)
-# Loading ieee.std_logic_1164(body)
-# Loading work.processor(structural)
-# Loading ieee.numeric_std(body)
-# Loading ieee.std_logic_arith(body)
-# Loading ieee.std_logic_unsigned(body)
-# Loading work.address_module(address)
-# Loading work.mux2(when_else_mux)
-# Loading work.reg(behavioral)
-# Loading work.memory(memory_architecture)
 add wave -position insertpoint  \
 sim:/processor/in_port \
 sim:/processor/interrupt \
