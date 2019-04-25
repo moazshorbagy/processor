@@ -26,21 +26,19 @@ architecture structural of Processor is
 		  );
   end component memory;
   
- component Address_Module is
-port(
-	stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
-	FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
-	address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
-	clk,rst: in std_logic;
-	pc_plus_one: out std_logic_vector(19 downto 0);
-	
-	--Iteration 2...
-	spadd: in std_logic_vector(1 downto 0);
-	EA: in std_logic_vector (19 downto 0);
-	mem_addr_src: in std_logic_vector (1 downto 0)
-
-);
-end component;
+  component Address_Module is
+    port(
+      stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
+      FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
+      address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
+      clk,rst: in std_logic;
+      pc_plus_one: out std_logic_vector(19 downto 0);
+      --Iteration 2...
+      spadd: in std_logic_vector(1 downto 0);
+      EA: in std_logic_vector (19 downto 0);
+      mem_addr_src: in std_logic_vector (1 downto 0)
+    );
+  end component;
   
   component ResolveInstr is
     port(
@@ -50,12 +48,12 @@ end component;
       addr_2: out std_logic_vector(2 downto 0);
       mem_data: out std_logic_vector(15 downto 0); 
       eff_addr: out std_logic_vector(19 downto 0);
-      shift_val: out std_logic_vector(3 downto 0)
+      shift_val: out std_logic_vector(15 downto 0)
     );
   end component;
 
   component RegFile is
-  generic(n: integer:=16);
+    generic(n: integer:=16);
     port(
       clk, rst: in std_logic;
       write_addr_1, write_addr_2: in std_logic_vector(2 downto 0);
@@ -81,64 +79,59 @@ end component;
   end component;
   
   component DecodeExBuffer IS
-PORT(
-	PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
-	PCSrc_next, RET_next, ZN_next, setC_next, clC_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
-	memAddrSrc_prev,  SPAdd_prev, resSel_prev : IN std_logic_vector (1 downto 0 );
-	memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
-	Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
-	Data1_next, Data2_next, Port_next : OUT std_logic_vector (15 downto 0);
-	addr2_prev, RegAddr_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
-	addr2_next, RegAddr_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
-	EA_prev : IN std_logic_vector ( 19 downto 0);
-	EA_next : OUT std_logic_vector ( 19 downto 0);
-	PC_flags_prev : IN std_logic_vector (31 downto 0);
-	PC_flags_next : OUT std_logic_vector (31 downto 0);
-	clk, rst, enable : IN std_logic
-);
+    PORT(
+      PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
+      PCSrc_next, RET_next, ZN_next, setC_next, clC_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
+      memAddrSrc_prev,  SPAdd_prev, resSel_prev : IN std_logic_vector (1 downto 0 );
+      memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
+      Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
+      Data1_next, Data2_next, Port_next : OUT std_logic_vector (15 downto 0);
+      addr2_prev, RegAddr_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
+      addr2_next, RegAddr_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
+      EA_prev : IN std_logic_vector ( 19 downto 0);
+      EA_next : OUT std_logic_vector ( 19 downto 0);
+      PC_flags_prev : IN std_logic_vector (31 downto 0);
+      PC_flags_next : OUT std_logic_vector (31 downto 0);
+      clk, rst, enable : IN std_logic
+    );
 
-END component;
-
-
-component ALU is	
-generic (m: integer:=16);   		   			--Made it generic incase we changed something in design
-port (
-	Data1,Data2:in std_logic_vector(m-1 downto 0);		--Based on ALU_OP we might not use both of the data in ports	
-	alu_op:in std_logic_vector(2 downto 0);			--8 Operations
-	Res1,Res2: out std_logic_vector (m-1 downto 0); 	--Res2 is only used for multiplication, else it will be set to don't care
-	C,N,Z:out std_logic);					--Carry, Negative,Zero
-end component;
-
-component flags is 
-
-PORT(
-	-- ALUC, ALUZ, ALUN : flags coming from the ALU
-	-- setC, clC, ZN : signals coming from the control unit
-	-- C, Z, N : Output flags
-	ALUC, ALUZ, ALUN, setC, clC, ZN, clk, rst, enable: IN std_logic;
-	C, Z, N : OUT std_logic
-);
+  END component;
 
 
-END component;
+  component ALU is	
+    generic (m: integer:=16);   		   			--Made it generic incase we changed something in design
+    port (
+      Data1,Data2:in std_logic_vector(m-1 downto 0);		--Based on ALU_OP we might not use both of the data in ports	
+      alu_op:in std_logic_vector(2 downto 0);			--8 Operations
+      Res1,Res2: out std_logic_vector (m-1 downto 0); 	--Res2 is only used for multiplication, else it will be set to don't care
+      C,N,Z:out std_logic);					--Carry, Negative,Zero
+  end component;
 
+  component flags is 
+    PORT(
+      -- ALUC, ALUZ, ALUN : flags coming from the ALU
+      -- setC, clC, ZN : signals coming from the control unit
+      -- C, Z, N : Output flags
+      ALUC, ALUZ, ALUN, setC, clC, ZN, clk, rst, enable: IN std_logic;
+      C, Z, N : OUT std_logic
+    );
+  END component;
 
-COMPONENT mux4 is 
-generic (n : integer:=16);
-port(
-in0, in1, in2, in3: in std_logic_vector (n-1 downto 0);
-sel : in  std_logic_vector (1 downto 0);
-out1 : out std_logic_vector (n-1 downto 0));
-end COMPONENT;
+  COMPONENT mux4 is 
+    generic (n : integer:=16);
+    port(
+    in0, in1, in2, in3: in std_logic_vector (n-1 downto 0);
+    sel : in  std_logic_vector (1 downto 0);
+    out1 : out std_logic_vector (n-1 downto 0));
+  end COMPONENT;
 
-
-COMPONENT Mux2 is
-	generic (n: integer:=16);
-	port (
-    in_0, in_1: in std_logic_vector (n-1 downto 0);
-    sel: in std_logic;
-		out_1: out std_logic_vector (n-1 downto 0));
-end COMPONENT;
+  COMPONENT Mux2 is
+    generic (n: integer:=16);
+    port (
+      in_0, in_1: in std_logic_vector (n-1 downto 0);
+      sel: in std_logic;
+      out_1: out std_logic_vector (n-1 downto 0));
+  end COMPONENT;
 
 
 -- types declaration --
@@ -153,10 +146,10 @@ end COMPONENT;
   
   -- Decode stage signals --
   signal D_pc_plus_one, D_eff_addr: std_logic_vector (19 downto 0);
-  signal D_port, D_mem_data, D_read_data_1, D_read_data_2 : std_logic_vector (15 downto 0);
+  signal D_port, D_mem_data, D_read_data_1, D_read_data_2, D_data_2: std_logic_vector (15 downto 0);
   signal D_instr: std_logic_vector (31 downto 0);
   signal D_op_code: std_logic_vector (4 downto 0);
-  signal D_shift_val:  std_logic_vector (3 downto 0);
+  signal D_shift_val:  std_logic_vector (15 downto 0);
   signal D_read_addr_1, D_read_addr_2, D_write_addr_1, D_write_addr_2, D_reg_addr : std_logic_vector (2 downto 0);
   signal D_we_1, D_we_2: std_logic;
   signal D_pc_plus_one_flags: std_logic_vector (31 downto 0);
@@ -182,67 +175,67 @@ end COMPONENT;
   
   -- Control Unit Lines --
   
-signal	D_wb	: std_logic;
-signal	D_mem_wr	: std_logic;
-signal	D_setc	: std_logic;
-signal	D_clc	: std_logic;
-signal	D_zn	: std_logic;
-signal	D_alu_op	: std_logic_vector (2 downto 0);
-signal	D_reg_src	: std_logic;
-signal	D_alu_src_2	: std_logic;
-signal	D_output_enable	: std_logic;
-signal	D_reg_addr_src	: std_logic;
-signal	D_res_sel	: std_logic_vector (1 downto 0);
-signal	D_data_2_sel	: std_logic;
-signal	D_stall_fetch	: std_logic;
-signal	D_sp_en	: std_logic;
-signal	D_sp_add	: std_logic_vector (1 downto 0);
-signal	D_mem_addr_src	: std_logic_vector (1 downto 0);
-signal	D_pc_src	: std_logic;
-signal	D_call	: std_logic;
-signal	D_ret	: std_logic;
+  signal	D_wb	: std_logic;
+  signal	D_mem_wr	: std_logic;
+  signal	D_setc	: std_logic;
+  signal	D_clc	: std_logic;
+  signal	D_zn	: std_logic;
+  signal	D_alu_op	: std_logic_vector (2 downto 0);
+  signal	D_reg_src	: std_logic;
+  signal	D_alu_src_2	: std_logic;
+  signal	D_output_enable	: std_logic;
+  signal	D_reg_addr_src	: std_logic;
+  signal	D_res_sel	: std_logic_vector (1 downto 0);
+  signal	D_data_2_sel	: std_logic;
+  signal	D_stall_fetch	: std_logic;
+  signal	D_sp_en	: std_logic;
+  signal	D_sp_add	: std_logic_vector (1 downto 0);
+  signal	D_mem_addr_src	: std_logic_vector (1 downto 0);
+  signal	D_pc_src	: std_logic;
+  signal	D_call	: std_logic;
+  signal	D_ret	: std_logic;
 
 
  -- Execute Stage Lines --
 
-signal	E_wb	: std_logic;
-signal	E_mem_wr	: std_logic;
-signal	E_setc	: std_logic;
-signal	E_clc	: std_logic;
-signal	E_zn	: std_logic;
-signal	E_alu_op	: std_logic_vector (2 downto 0);
-signal	E_reg_src	: std_logic;
-signal	E_alu_src_2	: std_logic;
-signal	E_output_enable	: std_logic;
-signal	E_reg_addr_src	: std_logic;
-signal	E_res_sel	: std_logic_vector (1 downto 0);
-signal	E_data_2_sel	: std_logic;
-signal	E_stall_fetch	: std_logic;
-signal	E_sp_en	: std_logic;
-signal	E_sp_add	: std_logic_vector (1 downto 0);
-signal	E_mem_addr_src	: std_logic_vector (1 downto 0);
-signal	E_pc_src	: std_logic;
-signal	E_call	: std_logic;
-signal	E_ret	: std_logic;
-signal E_res : std_logic_vector (15 downto 0);
-signal E_res2 : std_logic_vector ( 15 downto 0);
-signal E_ALU_C: std_logic;
-signal E_ALU_Z : std_logic;
-signal E_ALU_N : std_logic;
-signal E_N : std_logic;
-signal E_Z : std_logic;
-signal E_C : std_logic;
-signal E_ALU_operand_2 : std_logic_vector(15 downto 0);
-signal E_ALU_res : std_logic_vector(15 downto 0);
+  signal	E_wb	: std_logic;
+  signal	E_mem_wr	: std_logic;
+  signal	E_setc	: std_logic;
+  signal	E_clc	: std_logic;
+  signal	E_zn	: std_logic;
+  signal	E_alu_op	: std_logic_vector (2 downto 0);
+  signal	E_reg_src	: std_logic;
+  signal	E_alu_src_2	: std_logic;
+  signal	E_output_enable	: std_logic;
+  signal	E_reg_addr_src	: std_logic;
+  signal	E_res_sel	: std_logic_vector (1 downto 0);
+  signal	E_data_2_sel	: std_logic;
+  signal	E_stall_fetch	: std_logic;
+  signal	E_sp_en	: std_logic;
+  signal	E_sp_add	: std_logic_vector (1 downto 0);
+  signal	E_mem_addr_src	: std_logic_vector (1 downto 0);
+  signal	E_pc_src	: std_logic;
+  signal	E_call	: std_logic;
+  signal	E_ret	: std_logic;
+  signal E_res : std_logic_vector (15 downto 0);
+  signal E_res2 : std_logic_vector ( 15 downto 0);
+  signal E_ALU_C: std_logic;
+  signal E_ALU_Z : std_logic;
+  signal E_ALU_N : std_logic;
+  signal E_N : std_logic;
+  signal E_Z : std_logic;
+  signal E_C : std_logic;
+  signal E_ALU_operand_2 : std_logic_vector(15 downto 0);
+  signal E_ALU_res : std_logic_vector(15 downto 0);
 
 
  -- Write back signals --
  
- signal WB_write_addr_1, WB_write_addr_2: STD_LOGIC_VECTOR (2 downto 0);
- signal WB_write_data_1, WB_write_data_2: STD_LOGIC_VECTOR (15 downto 0);
- signal WB_we_1, WB_we_2 : STD_LOGIC; 
+  signal WB_write_addr_1, WB_write_addr_2: STD_LOGIC_VECTOR (2 downto 0);
+  signal WB_write_data_1, WB_write_data_2, WB_res: STD_LOGIC_VECTOR (15 downto 0);
+  signal WB_we_1, WB_we_2 : STD_LOGIC; 
 
-
+  
 -- begin architecture definition --
 begin
   
@@ -267,69 +260,73 @@ begin
 
   WB_write_addr_1 <= "000";
   WB_write_addr_2 <= "001";
-  WB_write_data_1 <= "0000000000000001";
   WB_write_data_2 <= "0000000000000010";
   WB_we_1<='0';
   WB_we_2 <='0';
- 
+
   splitter: ResolveInstr port map(D_instr, D_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
+
+  reg_src_mux: Mux2 generic map (16) port map(D_mem_data, WB_res, D_reg_src, WB_write_data_1);
+  reg_addr_src_mux: Mux2 generic map (16) port map(D_read_addr_1, D_read_addr_2, D_reg_addr_src, D_reg_addr);
+  data_2_mux: Mux2 generic map (16) port map(D_read_data_2, D_shift_val, D_data_2_sel, D_data_2);
+
   register_file_unit: RegFile port map(clk, reset, WB_write_addr_1, WB_write_addr_2, WB_write_data_1, WB_write_data_2, WB_we_1, WB_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
   
   
    ----------------------------------- ID/Ex Buffer -----------------------------------
   decode_execute_buffer_enable <= '1';
   id_ex_buff: DecodeExBuffer port map(
-D_pc_src,
-D_ret,
-D_zn,
-D_setc,
-D_clc,
-D_mem_wr,
-D_wb,
-D_stall_fetch,
-D_sp_en,
-D_call,
-D_reg_src,
-D_alu_src_2,
-D_output_enable,
-E_pc_src,
-E_ret,
-E_zn,
-E_setc,
-E_clc,
-E_mem_wr,
-E_wb,
-E_stall_fetch,
-E_sp_en,
-E_call,
-E_reg_src,
-E_alu_src_2,
-E_output_enable,
-D_mem_addr_src,	
-D_sp_add,	
-D_res_sel,
-E_mem_addr_src,	
-E_sp_add,	
-E_res_sel,
-D_read_data_1,	
-D_read_data_2,
-D_port,
-E_read_data_1,	
-E_read_data_2,
-E_port,
-D_read_addr_2,
-D_reg_addr,	
-D_alu_op,
-E_read_addr_2,	
-E_reg_addr,	
-E_alu_op,
-D_eff_addr,
-E_eff_addr,
-D_pc_plus_one_flags,		
-E_pc_plus_one_flags,	
-clk,
-reset,
-decode_execute_buffer_enable
+    D_pc_src,
+    D_ret,
+    D_zn,
+    D_setc,
+    D_clc,
+    D_mem_wr,
+    D_wb,
+    D_stall_fetch,
+    D_sp_en,
+    D_call,
+    D_reg_src,
+    D_alu_src_2,
+    D_output_enable,
+    E_pc_src,
+    E_ret,
+    E_zn,
+    E_setc,
+    E_clc,
+    E_mem_wr,
+    E_wb,
+    E_stall_fetch,
+    E_sp_en,
+    E_call,
+    E_reg_src,
+    E_alu_src_2,
+    E_output_enable,
+    D_mem_addr_src,	
+    D_sp_add,	
+    D_res_sel,
+    E_mem_addr_src,	
+    E_sp_add,	
+    E_res_sel,
+    D_read_data_1,	
+    D_data_2,
+    D_port,
+    E_read_data_1,	
+    E_read_data_2,
+    E_port,
+    D_read_addr_2,
+    D_reg_addr,	
+    D_alu_op,
+    E_read_addr_2,	
+    E_reg_addr,	
+    E_alu_op,
+    D_eff_addr,
+    E_eff_addr,
+    D_pc_plus_one_flags,		
+    E_pc_plus_one_flags,	
+    clk,
+    reset,
+    decode_execute_buffer_enable
   );
 
 ----------------------------------- Execute Stage -----------------------------------
@@ -346,5 +343,3 @@ decode_execute_buffer_enable
 
 
 end architecture;
-
-
