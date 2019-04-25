@@ -153,6 +153,10 @@ port(
 	EA: in std_logic_vector (19 downto 0);
 	mem_addr_src: in std_logic_vector (1 downto 0);
 	spen: in std_logic;
+	pc_src:in std_logic;
+	RET: in std_logic;
+	memory_out: in std_logic_vector (19 downto 0);
+	data1_extended: in std_logic_vector (19 downto 0);
 	address: out std_logic_vector(19 downto 0)		--PC value or SP value or EA or SP+1..
 
 );
@@ -316,7 +320,7 @@ end component;
   signal	M_pc_plus_one_flags: std_logic_vector (31 downto 0);
   signal 	M_write_data : std_logic_vector ( 31 downto 0);
   signal 	M_res_extended : std_logic_vector ( 31 downto 0);
-
+  signal 	temp_data1_extended: std_logic_vector (19 downto 0);
  -- Write back signals --
  
   signal WB_write_addr_1, WB_write_addr_2: STD_LOGIC_VECTOR (2 downto 0);
@@ -343,8 +347,8 @@ begin
   FAT <= mem_out(31) and mem_out(30) and mem_out(29);
   M_res_extended <= "0000000000000000" & M_res;
   Mux_M_write_data : Mux2 generic map (32) port map (M_res_extended, M_pc_plus_one_flags, M_call, M_write_data );
-
-  address_control_unit : Address_Module port map(M_stall_fetch, FAT, clk, reset, M_sp_add , M_eff_addr, M_mem_addr_src, M_sp_en,address);
+  temp_data1_extended<="0000"&D_read_data_1;
+  address_control_unit : Address_Module port map(M_stall_fetch, FAT, clk, reset, M_sp_add , M_eff_addr, M_mem_addr_src, M_sp_en, D_pc_src, M_ret, mem_out(31 downto 12), temp_data1_extended, address);
   memory_unit : Memory port map(clk, M_write_enable, W32, address, M_write_data, mem_out);
     
   ----------------------------------- IF/ID Buffer -----------------------------------
@@ -369,6 +373,8 @@ begin
 
   register_file_unit: RegFile port map(clk, reset, WB_write_addr_1, WB_write_addr_2, WB_write_data_1, WB_write_data_2, WB_we_1, WB_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
   
+  control_unit : ControlUnit port map (D_wb, D_mem_wr , D_setc , D_clc , D_zn ,	D_alu_op , D_reg_src , D_alu_src_2 , D_output_enable , D_reg_addr_src , D_res_sel, D_data_2_sel , D_stall_fetch , D_sp_en, D_sp_add , 
+	D_mem_addr_src,	 D_pc_src ,D_call,D_ret, E_C, E_N, E_Z, D_op_code);
   
    ----------------------------------- ID/Ex Buffer -----------------------------------
   decode_execute_buffer_enable <= '1';
@@ -442,8 +448,7 @@ begin
   -- The mux selecting res from ALU, DATA1, PORT, and Immediate data
   res_mux : mux4 generic map (16) port map (E_ALU_res, E_read_data_1, E_port, E_eff_addr(15 downto 0), E_res_sel, E_res);
   
-      control_unit : ControlUnit port map (D_wb, D_mem_wr , D_setc , D_clc , D_zn ,	D_alu_op , D_reg_src , D_alu_src_2 , D_output_enable , D_reg_addr_src , D_res_sel, D_data_2_sel , D_stall_fetch , D_sp_en, D_sp_add , 
-	D_mem_addr_src,	 D_pc_src ,D_call,D_ret, E_C, E_N, E_Z, D_op_code);
+      
 
 --------------------------------- Execute Memory Buffer ----------------------------
  ExecuteMemoryBuffer :  ExecuteMemBuffer port map (	E_ret, E_mem_wr, E_wb, E_wb2, E_stall_fetch, E_sp_en, E_call, E_reg_src, E_output_enable,
