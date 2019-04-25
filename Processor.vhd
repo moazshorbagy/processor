@@ -347,7 +347,7 @@ begin
   splitter: ResolveInstr port map(D_instr, D_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
 
   reg_src_mux: Mux2 generic map (16) port map(D_mem_data, WB_res, D_reg_src, WB_write_data_1);
-  reg_addr_src_mux: Mux2 generic map (16) port map(D_read_addr_1, D_read_addr_2, D_reg_addr_src, D_reg_addr);
+  reg_addr_src_mux: Mux2 generic map (3) port map(D_read_addr_1, D_read_addr_2, D_reg_addr_src, D_reg_addr);
   data_2_mux: Mux2 generic map (16) port map(D_read_data_2, D_shift_val, D_data_2_sel, D_data_2);
 
   register_file_unit: RegFile port map(clk, reset, WB_write_addr_1, WB_write_addr_2, WB_write_data_1, WB_write_data_2, WB_we_1, WB_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
