@@ -118,7 +118,7 @@ END component;
 
 component ControlUnit IS
 PORT   (
-		 wb, mem_wr , setc , clc , zn : OUT std_logic;
+		 wb,wb2, mem_wr , setc , clc , zn : OUT std_logic;
 		
 		 alu_op : OUT std_logic_vector( 2 DOWNTO 0);
 		 
@@ -365,7 +365,7 @@ begin
   
   splitter: ResolveInstr port map(D_instr, D_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
 
-  D_wb2 <= '0';
+
 
   reg_src_mux: Mux2 generic map (16) port map(D_mem_data, WB_res, D_reg_src, WB_write_data_1);
   reg_addr_src_mux: Mux2 generic map (3) port map(D_read_addr_1, D_read_addr_2, D_reg_addr_src, D_reg_addr);
@@ -373,7 +373,7 @@ begin
 
   register_file_unit: RegFile port map(clk, reset, WB_write_addr_1, WB_write_addr_2, WB_write_data_1, WB_write_data_2, WB_we_1, WB_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
   
-  control_unit : ControlUnit port map (D_wb, D_mem_wr , D_setc , D_clc , D_zn ,	D_alu_op , D_reg_src , D_alu_src_2 , D_output_enable , D_reg_addr_src , D_res_sel, D_data_2_sel , D_stall_fetch , D_sp_en, D_sp_add , 
+  control_unit : ControlUnit port map (D_wb,D_wb2 ,D_mem_wr , D_setc , D_clc , D_zn ,	D_alu_op , D_reg_src , D_alu_src_2 , D_output_enable , D_reg_addr_src , D_res_sel, D_data_2_sel , D_stall_fetch , D_sp_en, D_sp_add , 
 	D_mem_addr_src,	 D_pc_src ,D_call,D_ret, E_C, E_N, E_Z, D_op_code);
   
    ----------------------------------- ID/Ex Buffer -----------------------------------
