@@ -423,8 +423,8 @@ begin
   -- The mux selecting res from ALU, DATA1, PORT, and Immediate data
   res_mux : mux4 generic map (16) port map (E_ALU_res, E_read_data_1, E_port, E_eff_addr(15 downto 0), E_res_sel, E_res);
   
-      control_unit : ControlUnit port map (E_wb, E_mem_wr , E_setc , E_clc , E_zn ,	E_alu_op , E_reg_src , E_alu_src_2 , E_output_enable , E_reg_addr_src , E_res_sel, E_data_2_sel , E_stall_fetch , E_sp_en, E_sp_add , 
-	E_mem_addr_src,	 E_pc_src ,E_call,E_ret, E_C, E_N, E_Z, D_op_code);
+      control_unit : ControlUnit port map (D_wb, D_mem_wr , D_setc , D_clc , D_zn ,	D_alu_op , D_reg_src , D_alu_src_2 , D_output_enable , D_reg_addr_src , D_res_sel, D_data_2_sel , D_stall_fetch , D_sp_en, D_sp_add , 
+	D_mem_addr_src,	 D_pc_src ,D_call,D_ret, E_C, E_N, E_Z, D_op_code);
 
 --------------------------------- Execute Memory Buffer ----------------------------
  ExecuteMemoryBuffer :  ExecuteMemBuffer port map (	E_ret, E_mem_wr, E_wb, E_stall_fetch, E_sp_en, E_call, E_reg_src, E_output_enable,
