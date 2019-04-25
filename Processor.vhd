@@ -133,6 +133,26 @@ architecture structural of Processor is
       out_1: out std_logic_vector (n-1 downto 0));
   end COMPONENT;
 
+ COMPONENT ExecuteMemBuffer IS
+ PORT(
+
+	RET_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, outEnable_prev : IN std_logic;
+	RET_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, outEnable_next : OUT std_logic;
+	memAddrSrc_prev,  SPAdd_prev : IN std_logic_vector (1 downto 0 );
+	memAddrSrc_next,  SPAdd_next : OUT std_logic_vector (1 downto 0 );
+	res1_prev, res2_prev : IN std_logic_vector (15 downto 0);
+	res1_next, res2_next : OUT std_logic_vector (15 downto 0);
+	addr2_prev, RegAddr_prev : IN std_logic_vector ( 2 downto 0);
+	addr2_next, RegAddr_next : OUT std_logic_vector ( 2 downto 0);
+	EA_prev : IN std_logic_vector ( 19 downto 0);
+	EA_next : OUT std_logic_vector ( 19 downto 0);
+	PC_flags_prev : IN std_logic_vector (31 downto 0);	--PC+1 & flags
+	PC_flags_next : OUT std_logic_vector (31 downto 0);
+	clk, rst, enable : IN std_logic
+);
+
+ END COMPONENT;
+
 
 -- types declaration --
 
@@ -228,6 +248,27 @@ architecture structural of Processor is
   signal E_ALU_operand_2 : std_logic_vector(15 downto 0);
   signal E_ALU_res : std_logic_vector(15 downto 0);
 
+
+  -- Memory Stage Lines --
+
+  signal	M_wb	: std_logic;
+  signal	M_mem_wr	: std_logic;
+  signal	M_reg_src	: std_logic;
+  signal	M_output_enable	: std_logic;
+  signal	M_reg_addr_src	: std_logic;
+  signal	M_res_sel	: std_logic_vector (1 downto 0);
+  signal	M_data_2_sel	: std_logic;
+  signal	M_stall_fetch	: std_logic;
+  signal	M_sp_en	: std_logic;
+  signal	M_sp_add	: std_logic_vector (1 downto 0);
+  signal	M_mem_addr_src	: std_logic_vector (1 downto 0);
+  signal	M_call	: std_logic;
+  signal	M_ret	: std_logic;
+  signal 	M_res : std_logic_vector (15 downto 0);
+  signal 	M_res2 : std_logic_vector ( 15 downto 0);
+  signal 	M_read_addr_2,	M_reg_addr : std_logic_vector (2 downto 0);
+  signal 	M_eff_addr : std_logic_vector (19 downto 0);
+  signal	M_pc_plus_one_flags: std_logic_vector (31 downto 0);
 
  -- Write back signals --
  
@@ -340,6 +381,21 @@ begin
 
   -- The mux selecting res from ALU, DATA1, PORT, and Immediate data
   res_mux : mux4 generic map (16) port map (E_ALU_res, E_read_data_1, E_port, E_eff_addr(15 downto 0), E_res_sel, E_res);
+
+--------------------------------- Execute Memory Buffer ----------------------------
+ ExecuteMemoryBuffer :  ExecuteMemBuffer port map (	E_ret, E_mem_wr, E_wb, E_stall_fetch, E_sp_en, E_call, E_reg_src, E_output_enable,
+							M_ret, M_mem_wr, M_wb, M_stall_fetch, M_sp_en, M_call, M_reg_src, M_output_enable,
+							E_mem_addr_src, E_sp_add,
+							M_mem_addr_src, M_sp_add,
+							E_res, E_res2,
+							M_res, M_res2,
+							E_read_addr_2, E_reg_addr,
+							M_read_addr_2, M_reg_addr,
+							E_eff_addr,
+							M_eff_addr,
+							E_pc_plus_one_flags,
+							M_pc_plus_one_flags,
+							clk, reset, ex_mem_enable);
 
 
 end architecture;
