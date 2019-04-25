@@ -14,7 +14,6 @@ architecture structural of Processor is
   
 -- components declaration --
 
-
   component memory is
     port(
       clk : IN std_logic;
@@ -23,34 +22,8 @@ architecture structural of Processor is
 		  address : IN  std_logic_vector(19 DOWNTO 0);
 		  datain  : IN  std_logic_vector(31 DOWNTO 0);
 		  dataout : OUT std_logic_vector(31 DOWNTO 0)
-		  );
+		);
   end component memory;
-  
-  component Address_Module is
-    port(
-      stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
-      FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
-      address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
-      clk,rst: in std_logic;
-      pc_plus_one: out std_logic_vector(19 downto 0);
-      --Iteration 2...
-      spadd: in std_logic_vector(1 downto 0);
-      EA: in std_logic_vector (19 downto 0);
-      mem_addr_src: in std_logic_vector (1 downto 0)
-    );
-  end component;
-  
-  component ResolveInstr is
-    port(
-      instr: in std_logic_vector(31 downto 0);
-      op_code: out std_logic_vector(4 downto 0);
-      addr_1: out std_logic_vector(2 downto 0);
-      addr_2: out std_logic_vector(2 downto 0);
-      mem_data: out std_logic_vector(15 downto 0); 
-      eff_addr: out std_logic_vector(19 downto 0);
-      shift_val: out std_logic_vector(15 downto 0)
-    );
-  end component;
 
   component RegFile is
     generic(n: integer:=16);
@@ -63,8 +36,18 @@ architecture structural of Processor is
       read_data_1, read_data_2: out std_logic_vector(n-1 downto 0)
     );
   end component;
+
+  component ALU is	
+    generic (m: integer:=16);   		   			--Made it generic incase we changed something in design
+    port (
+      Data1,Data2:in std_logic_vector(m-1 downto 0);		--Based on ALU_OP we might not use both of the data in ports	
+      alu_op:in std_logic_vector(2 downto 0);			--8 Operations
+      Res1,Res2: out std_logic_vector (m-1 downto 0); 	--Res2 is only used for multiplication, else it will be set to don't care
+      C,N,Z:out std_logic);					--Carry, Negative,Zero
+  end component;
   
-  -- buffers --
+  
+  -- Buffers --
   
   component FetchDecodeBuffer IS
     PORT(
@@ -94,17 +77,64 @@ architecture structural of Processor is
       PC_flags_next : OUT std_logic_vector (31 downto 0);
       clk, rst, enable : IN std_logic
     );
-
   END component;
+  
+  COMPONENT ExecuteMemBuffer IS
+    PORT(
+      RET_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, outEnable_prev : IN std_logic;
+      RET_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, outEnable_next : OUT std_logic;
+      memAddrSrc_prev,  SPAdd_prev : IN std_logic_vector (1 downto 0 );
+      memAddrSrc_next,  SPAdd_next : OUT std_logic_vector (1 downto 0 );
+      res1_prev, res2_prev : IN std_logic_vector (15 downto 0);
+      res1_next, res2_next : OUT std_logic_vector (15 downto 0);
+      addr2_prev, RegAddr_prev : IN std_logic_vector ( 2 downto 0);
+      addr2_next, RegAddr_next : OUT std_logic_vector ( 2 downto 0);
+      EA_prev : IN std_logic_vector ( 19 downto 0);
+      EA_next : OUT std_logic_vector ( 19 downto 0);
+      PC_flags_prev : IN std_logic_vector (31 downto 0);	--PC+1 & flags
+      PC_flags_next : OUT std_logic_vector (31 downto 0);
+      clk, rst, enable : IN std_logic
+    );
+  END COMPONENT;
 
+  COMPONENT MemWBBuffer IS
+    PORT(
+      WB_prev, NOP_prev, RegSrc_prev, outEnable_prev : IN std_logic;
+      WB_next, NOP_next, RegSrc_next, outEnable_next : OUT std_logic;
+      res2_prev, res_prev : IN std_logic_vector(15 downto 0);
+      res2_next, res_next : OUT std_logic_vector(15 downto 0);
+      RegAddr_prev, RegAddr2_prev : IN std_logic_vector ( 2 downto 0);
+      RegAddr_next, RegAddr2_next : OUT std_logic_vector ( 2 downto 0);
+      clk, rst, enable : IN std_logic
+    );
+  END COMPONENT;
 
-  component ALU is	
-    generic (m: integer:=16);   		   			--Made it generic incase we changed something in design
-    port (
-      Data1,Data2:in std_logic_vector(m-1 downto 0);		--Based on ALU_OP we might not use both of the data in ports	
-      alu_op:in std_logic_vector(2 downto 0);			--8 Operations
-      Res1,Res2: out std_logic_vector (m-1 downto 0); 	--Res2 is only used for multiplication, else it will be set to don't care
-      C,N,Z:out std_logic);					--Carry, Negative,Zero
+-- Extra components --
+
+  component Address_Module is
+    port(
+      stall_fetch:in std_logic;				--Selector for mux before PC... to increment PC or to keep it as it is (stall)
+      FAT:in std_logic;					--For FAT instructions (Multiplication) which will be used to increment pc by 2
+      address: out std_logic_vector(19 downto 0);		--PC value or SP value or EA or SP+1..
+      clk,rst: in std_logic;
+      pc_plus_one: out std_logic_vector(19 downto 0);
+      --Iteration 2...
+      spadd: in std_logic_vector(1 downto 0);
+      EA: in std_logic_vector (19 downto 0);
+      mem_addr_src: in std_logic_vector (1 downto 0)
+    );
+  end component;
+
+  component ResolveInstr is
+    port(
+      instr: in std_logic_vector(31 downto 0);
+      op_code: out std_logic_vector(4 downto 0);
+      addr_1: out std_logic_vector(2 downto 0);
+      addr_2: out std_logic_vector(2 downto 0);
+      mem_data: out std_logic_vector(15 downto 0); 
+      eff_addr: out std_logic_vector(19 downto 0);
+      shift_val: out std_logic_vector(15 downto 0)
+    );
   end component;
 
   component flags is 
@@ -133,26 +163,6 @@ architecture structural of Processor is
       out_1: out std_logic_vector (n-1 downto 0));
   end COMPONENT;
 
- COMPONENT ExecuteMemBuffer IS
- PORT(
-
-	RET_prev, MemW_prev, WB_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, outEnable_prev : IN std_logic;
-	RET_next, MemW_next, WB_next, stallFetch_next, SPEn_next, call_next, regSrc_next, outEnable_next : OUT std_logic;
-	memAddrSrc_prev,  SPAdd_prev : IN std_logic_vector (1 downto 0 );
-	memAddrSrc_next,  SPAdd_next : OUT std_logic_vector (1 downto 0 );
-	res1_prev, res2_prev : IN std_logic_vector (15 downto 0);
-	res1_next, res2_next : OUT std_logic_vector (15 downto 0);
-	addr2_prev, RegAddr_prev : IN std_logic_vector ( 2 downto 0);
-	addr2_next, RegAddr_next : OUT std_logic_vector ( 2 downto 0);
-	EA_prev : IN std_logic_vector ( 19 downto 0);
-	EA_next : OUT std_logic_vector ( 19 downto 0);
-	PC_flags_prev : IN std_logic_vector (31 downto 0);	--PC+1 & flags
-	PC_flags_next : OUT std_logic_vector (31 downto 0);
-	clk, rst, enable : IN std_logic
-);
-
- END COMPONENT;
-
 
 -- types declaration --
 
@@ -179,8 +189,6 @@ architecture structural of Processor is
   signal E_read_addr_2,	E_reg_addr : std_logic_vector (2 downto 0);
   signal E_eff_addr : std_logic_vector (19 downto 0);
    signal E_pc_plus_one_flags: std_logic_vector (31 downto 0);
-
-
 
 
   
@@ -397,5 +405,9 @@ begin
 							M_pc_plus_one_flags,
 							clk, reset, ex_mem_enable);
 
+--------------------------------- Memory Write-Back Buffer ----------------------------
+MemoryWriteBackBuffer: MemWBBuffer port map(
+  
+);
 
 end architecture;
