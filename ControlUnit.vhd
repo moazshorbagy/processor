@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 ENTITY ControlUnit IS
 PORT   (
-		 wb, mem_wr , setc , clc , zn : OUT std_logic;
+		 wb, wb2 ,mem_wr , setc , clc , zn : OUT std_logic;
 		
 		 alu_op : OUT std_logic_vector( 2 DOWNTO 0);
 		 
@@ -90,6 +90,9 @@ BEGIN
 wb<= '0' When opcode = NOPop OR opcode = SETCop OR opcode = CLRCop OR opcode = OUTop OR opcode = PUSHop OR opcode = STDop OR opcode = JZop OR opcode = JNop OR opcode = JCop OR opcode = JMPop OR opcode = CALLop OR opcode = RETop OR opcode = RTIop
 Else '1' ;
 
+wb2<= '1' When opcode = MULop 
+Else '0' ;
+
 mem_wr<= '1' When opcode = PUSHop OR opcode = STDop OR opcode = CALLop
 Else '0';
 
@@ -104,12 +107,13 @@ Else '0' ;
 
 
 alu_op <= "000" When opcode = NOTop
-Else "001" When opcode = INCop OR opcode = ADDop OR opcode = MULop
+Else "001" When opcode = INCop OR opcode = ADDop 
 Else "010" When opcode = SUBop OR opcode = DECop
 Else "011" When opcode = ANDop
 Else "100" When opcode = ORop
 Else "101" When opcode = SHLop
 Else "110" When opcode = SHRop
+Else "111" When opcode = MULop
 Else "XXX";
 
 reg_src <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = OUTop OR opcode = INop OR opcode = MOVop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop OR opcode = SHLop OR opcode = SHRop OR opcode = LDMop
