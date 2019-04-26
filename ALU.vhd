@@ -1,7 +1,7 @@
 Library ieee;
 use ieee.std_logic_1164.all;
 USE IEEE.numeric_std.all;
-USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+
 entity ALU is
 generic (m: integer:=16);   		   		--Made it generic incase we changed something in design
 port (Data1,Data2:in std_logic_vector(m-1 downto 0);	--Based on ALU_OP we might not use both of the data in ports	
@@ -20,24 +20,25 @@ signal zeros16:std_logic_vector (m-1 downto 0);
 Signal result1:std_logic_vector (m-1 downto 0);
 Signal result2:std_logic_vector (m-1 downto 0);
 Signal mult:Std_Logic_vector 	(2*m-1 downto 0);
-
+Signal sum_Int,sub_Int,shAmt,data1_Int,data2_Int,mult_Int:Integer;
 begin 
 
-
-zeros16<=(others=>'0');
+mult_Int<=to_integer(unsigned(data1))*to_integer(unsigned(data2));
 not_data2 <= std_logic_vector(to_unsigned(to_integer(unsigned(not data2))+1,m));
+sum_Int<=to_integer(unsigned(data1))+to_integer(unsigned(data2));
+sub_Int<=to_integer(unsigned(data1))-to_integer(unsigned(data2));
+add_out<=std_logic_vector(to_unsigned(sum_Int,17));
+sub_out<=std_logic_vector(to_unsigned(sub_Int,17));
 
-add_out<=('0'&data1)+('0'&data2);
-sub_out<=('0'&data1)-('0'&data2);
-mult<=data1*data2;
+mult<=std_logic_vector(to_unsigned(mult_Int,32));
 
 res1<=(Not data1) when (alu_op="000")
 else (add_out(15 downto 0)) when (alu_op="001")
 else (sub_out(15 downto 0)) when (alu_op="010")
 else (data1 AND data2) when (alu_op="011")
 else (data1 OR data2) when (alu_op="100")
-else (data1(m-1-to_integer(unsigned(data2)) downto 0) & zeros16(to_integer(unsigned(data2))-1 downto 0)) when (alu_op="101") --SHL
-else (zeros16(m-1 downto m-1-to_integer(unsigned(data2))+1)&data1(m-1 downto to_integer(unsigned(data2)))) when (alu_op="110")	--SHR
+else (std_logic_vector(unsigned(data1) SLL  to_integer(unsigned(data2(3 downto 0)))) ) when (alu_op="101")
+else (std_logic_vector(unsigned(data1) SRL  to_integer(unsigned(data2(3 downto 0)))) ) when (alu_op="110")
 else (mult(m-1 downto 0)) when (alu_op="111");
 
 
@@ -46,8 +47,8 @@ else (add_out(15 downto 0)) when (alu_op="001")
 else (sub_out(15 downto 0)) when (alu_op="010")
 else (data1 AND data2) when (alu_op="011")
 else (data1 OR data2) when (alu_op="100")
-else (data1(m-1-to_integer(unsigned(data2)) downto 0) & zeros16(to_integer(unsigned(data2))-1 downto 0)) when (alu_op="101") --SHL
-else (zeros16(m-1 downto m-1-to_integer(unsigned(data2))+1)&data1(m-1 downto to_integer(unsigned(data2)))) when (alu_op="110")	--SHR
+else (std_logic_vector(unsigned(data1) SLL  to_integer(unsigned(data2(3 downto 0)))) ) when (alu_op="101")	--SHL
+else (std_logic_vector(unsigned(data1) SRL  to_integer(unsigned(data2(3 downto 0)))) ) when (alu_op="110")	--SHR
 else (mult(m-1 downto 0)) when (alu_op="111");
 
 res2<=mult(2*m-1 downto m) when (alu_op="111")
@@ -58,11 +59,11 @@ else (others=>'0');
 
 C <= add_out(m) when (alu_op="001")
 else sub_out(m) when (alu_op="010")
-else data1(m-1-to_integer(unsigned(data2))-1) when (alu_op="101")
-else data1(to_integer(unsigned(data2))-1) when (alu_op="110")
+else data1(16-to_integer(unsigned(data2(3 downto 0)))) when (alu_op="101" AND to_integer(unsigned(data2(3 downto 0)))/=0)
+else data1(to_integer(unsigned(data2(3 downto 0)))-1) when (alu_op="110" AND to_integer(unsigned(data2(3 downto 0)))/=0)
 else '0';
 
-Z<='1' when ((result1="0000000000000000") AND ((alu_op="000")OR(alu_op="001") OR (alu_op="010")OR (alu_op="011")OR(alu_op="100")OR (alu_op="101")OR (alu_op="110")))OR ((result1="0000000000000000")AND (result2="0000000000000000")AND (alu_op=111))
+Z<='1' when ((result1="0000000000000000") AND ((alu_op="000")OR(alu_op="001") OR (alu_op="010")OR (alu_op="011")OR(alu_op="100")OR (alu_op="101")OR (alu_op="110")))OR ((result1="0000000000000000")AND (result2="0000000000000000")AND (alu_op="111"))
 else '0';
 
 N<='1' when (result1(m-1)='1') AND ((alu_op="000") OR (alu_op="001") OR (alu_op="010")OR (alu_op="011")OR(alu_op="100")OR (alu_op="101")OR (alu_op="110"))

@@ -16,7 +16,7 @@ END ENTITY;
 
 ARCHITECTURE flags_arch OF flags IS
 
-COMPONENT fallingReg is
+COMPONENT Reg is
 generic(n: integer:=16);
   port(
     clk, rst, enable: in std_logic;
@@ -73,6 +73,6 @@ temp1 <= flag_reg_output(2);
 temp2 <= flag_reg_output(1);
 temp3 <= flag_reg_output(0);
 
-flags_reg : fallingReg generic map (4) port map (clk, rst, enable, flag_reg_input ,flag_reg_output);
+flags_reg : Reg generic map (4) port map (clk, rst, enable, flag_reg_input ,flag_reg_output);
 
 END flags_arch;
