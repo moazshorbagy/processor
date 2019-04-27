@@ -16,6 +16,8 @@ PORT(
 	EA_next : OUT std_logic_vector ( 19 downto 0);
 	PC_flags_prev : IN std_logic_vector (31 downto 0);	--PC+1 & flags
 	PC_flags_next : OUT std_logic_vector (31 downto 0);
+	opcode_prev   : In std_logic_vector (4 downto 0);
+	opcode_next   : Out std_logic_vector (4 downto 0);
 	clk, rst, enable : IN std_logic
 );
 
@@ -67,5 +69,6 @@ EA_reg : Reg  generic map (20) port map (clk, rst, enable, EA_prev, EA_next);
 
 PC_flags_reg : Reg  generic map (32) port map (clk, rst, enable, PC_flags_prev, PC_flags_next);
 
+opcode_reg : Reg  generic map (5) port map (clk, rst, enable, opcode_prev, opcode_next);
 
 END arch;
