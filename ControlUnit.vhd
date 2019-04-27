@@ -19,8 +19,10 @@ PORT   (
 		
 		 c_flag, n_flag, z_flag: IN std_logic;
 		
-	 	 opcode : IN std_logic_vector( 4 DOWNTO 0)
-		 
+	 	 opcode : IN std_logic_vector( 4 DOWNTO 0);
+		
+	 	 opcode_out: out std_logic_vector (4 downto 0)
+		
 	);
 
 END ControlUnit;
@@ -181,6 +183,6 @@ Else '0' ;
 pc_src <= callsig or j or (z_flag and jz) or (n_flag and jn) or (c_flag and jc);
 
 call <= callsig;
-
+opCode_out<=opcode;
 
 END CU;
