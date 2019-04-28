@@ -10,14 +10,16 @@ PORT(
 	memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
 	Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
 	Data1_next, Data2_next, Port_next : OUT std_logic_vector (15 downto 0);
-	addr2_prev, RegAddr_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
-	addr2_next, RegAddr_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
+	addr2_prev, RegAddr_prev,Rsrc_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
+	addr2_next, RegAddr_next,Rsrc_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
 	EA_prev : IN std_logic_vector ( 19 downto 0);
 	EA_next : OUT std_logic_vector ( 19 downto 0);
 	PC_flags_prev : IN std_logic_vector (31 downto 0);
 	PC_flags_next : OUT std_logic_vector (31 downto 0);
 	opCode_prev:	IN std_logic_vector (4 downto 0);
 	opCode_next: 	Out std_logic_vector (4 downto 0);
+	LD_use_prev   : IN std_logic;
+	LD_use_next   : OUT std_logic;
 	clk, rst, enable : IN std_logic
 );
 
@@ -78,5 +80,7 @@ EA_reg : fallingReg  generic map (20) port map (clk, rst, enable, EA_prev, EA_ne
 PC_flags_reg : fallingReg  generic map (32) port map (clk, rst, enable, PC_flags_prev, PC_flags_next);
 
 OP_code_reg  : fallingReg  generic map (5) port map (clk, rst, enable, opcode_prev, opcode_next);
+Rsrc_reg:      fallingReg  generic map (3) port map (clk, rst, enable, Rsrc_prev,   Rsrc_next);
+LD_use_reg:    fallingReg1bit port map (clk, rst, enable, LD_use_prev,LD_use_next);
 
 END arch;

@@ -70,12 +70,14 @@ PORT(
 	memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
 	Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
 	Data1_next, Data2_next, Port_next : OUT std_logic_vector (15 downto 0);
-	addr2_prev, RegAddr_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
-	addr2_next, RegAddr_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
+	addr2_prev, RegAddr_prev,Rsrc_prev, ALUOP_prev : IN std_logic_vector ( 2 downto 0);
+	addr2_next, RegAddr_next,Rsrc_next, ALUOP_next : OUT std_logic_vector ( 2 downto 0);
 	EA_prev : IN std_logic_vector ( 19 downto 0);
 	EA_next : OUT std_logic_vector ( 19 downto 0);
 	PC_flags_prev : IN std_logic_vector (31 downto 0);
 	PC_flags_next : OUT std_logic_vector (31 downto 0);
+	opCode_prev:	IN std_logic_vector (4 downto 0);
+	opCode_next: 	Out std_logic_vector (4 downto 0);
 	clk, rst, enable : IN std_logic
 );
 
@@ -96,6 +98,10 @@ END component;
 	EA_next : OUT std_logic_vector ( 19 downto 0);
 	PC_flags_prev : IN std_logic_vector (31 downto 0);	--PC+1 & flags
 	PC_flags_next : OUT std_logic_vector (31 downto 0);
+	opcode_prev   : In std_logic_vector (4 downto 0);
+	opcode_next   : Out std_logic_vector (4 downto 0);
+	LD_use_prev   : IN std_logic;
+	LD_use_next   : OUT std_logic;
 	clk, rst, enable : IN std_logic
 );
   END COMPONENT;
@@ -108,6 +114,8 @@ END component;
 	res2_next, res_next : OUT std_logic_vector(15 downto 0);
 	RegAddr_prev, RegAddr2_prev : IN std_logic_vector ( 2 downto 0);
 	RegAddr_next, RegAddr2_next : OUT std_logic_vector ( 2 downto 0);
+	LD_use_prev:in std_logic;
+	LD_use_next: out std_logic;
 	clk, rst, enable : IN std_logic
 );
 
@@ -140,6 +148,33 @@ PORT   (
 
 END component;
 
+Component ForwardUnit IS
+PORT(
+									--WB1 is for normal operations that have only 1 Rdst, WB2 is for mult which 
+	Ex_Mem_WB_reg:	in std_logic;					--writes back in 2 registers (2 Rdst)
+	Mem_WB_WB_reg: 	in std_logic;
+	Ex_Mem_WB2_reg:	in std_logic;
+	Mem_WB_WB2_reg:	in std_logic;
+	Id_Ex_Rsrc:	in std_logic_vector (2 downto 0);		--Rsrc in OP Code
+	Id_Ex_addr2:	in std_logic_vector (2 downto 0);		--Rdst in OP Code 
+	Id_Ex_OpCode:	in std_logic_vector (4 downto 0);		--For operations that have 2 Rsrc, i.e : AND, OR, ADD, SUB, MUL.
+	Ex_Mem_regAddr:	in std_logic_vector (2 downto 0);
+	Mem_WB_regAddr:	in std_logic_vector (2 downto 0);
+	Ex_Mem_addr2: 	in std_logic_vector (2 downto 0);	
+	Mem_WB_addr2:	in std_logic_vector (2 downto 0);
+	Ex_Mem_OpCode:	in std_logic_vector (4 downto 0);		--For load use case only, to stall incase of load
+
+			
+	Fwd_Mem_WB1:	out std_logic_vector(1 downto 0);		--Muxes Selectors
+	Fwd_Ex_Mem1:	out std_logic_vector(1 downto 0);
+	Fwd_Mem_WB2:	out std_logic_vector(1 downto 0);
+	Fwd_Ex_Mem2:	out std_logic_vector(1 downto 0);
+
+	
+	LD_use:		out std_logic					--For load use case forwarding and stalling
+
+);
+END Component;
 
   component  Address_Module is
 port(
@@ -220,15 +255,28 @@ end component;
   signal D_read_addr_1, D_read_addr_2, D_write_addr_1, D_write_addr_2, D_reg_addr : std_logic_vector (2 downto 0);
   signal D_we_1, D_we_2: std_logic;
   signal D_pc_plus_one_flags: std_logic_vector (31 downto 0);
-  
   -- Execute stage signals --
   signal  E_port, E_read_data_1, E_read_data_2 : std_logic_vector (15 downto 0);
   signal E_read_addr_2,	E_reg_addr : std_logic_vector (2 downto 0);
   signal E_eff_addr : std_logic_vector (19 downto 0);
-   signal E_pc_plus_one_flags: std_logic_vector (31 downto 0);
+  signal E_pc_plus_one_flags: std_logic_vector (31 downto 0);
 
 
-  
+  -- Signal for forwarding...muxes' slectors--
+
+  signal Fwd_Mem_WB_1:   std_logic_vector(1 downto 0);		--Muxes Selectors
+  signal Fwd_Ex_Mem_1:	std_logic_vector(1 downto 0);
+  signal Fwd_Mem_WB_2:	std_logic_vector(1 downto 0);
+  signal Fwd_Ex_Mem_2:	std_logic_vector(1 downto 0);
+
+
+  -- Signal for load/use case forwarding and stalling--
+  signal HDU_LD_use: std_logic;				--Used to directly stall for 1 cycle
+  signal M_LD_use:std_logic;				--Used to forward from mem to ALU
+  signal WB_LD_use:std_logic;
+
+
+
   -- Buffer enables --
   signal fetch_decode_buffer_enable: std_logic;
   signal decode_execute_buffer_enable: std_logic;
@@ -260,7 +308,8 @@ end component;
   signal	D_pc_src	: std_logic;
   signal	D_call	: std_logic;
   signal	D_ret	: std_logic;
-
+  signal 	D_opcode:  std_logic_vector (4 downto 0);
+  
 
  -- Execute Stage Lines --
 
@@ -284,17 +333,18 @@ end component;
   signal	E_pc_src	: std_logic;
   signal	E_call	: std_logic;
   signal	E_ret	: std_logic;
-  signal E_res : std_logic_vector (15 downto 0);
-  signal E_res2 : std_logic_vector ( 15 downto 0);
-  signal E_ALU_C: std_logic;
-  signal E_ALU_Z : std_logic;
-  signal E_ALU_N : std_logic;
-  signal E_N : std_logic;
-  signal E_Z : std_logic;
-  signal E_C : std_logic;
-  signal E_ALU_operand_2 : std_logic_vector(15 downto 0);
-  signal E_ALU_res : std_logic_vector(15 downto 0);
-
+  signal 	E_res : std_logic_vector (15 downto 0);
+  signal 	E_res2 : std_logic_vector ( 15 downto 0);
+  signal 	E_ALU_C: std_logic;
+  signal 	E_ALU_Z : std_logic;
+  signal 	E_ALU_N : std_logic;
+  signal 	E_N : std_logic;
+  signal 	E_Z : std_logic;
+  signal 	E_C : std_logic;
+  signal 	E_ALU_operand_2 : std_logic_vector(15 downto 0);
+  signal 	E_ALU_res : std_logic_vector(15 downto 0);
+  signal 	E_opcode:  std_logic_vector (4 downto 0);
+  signal 	E_Rsrc:    std_logic_vector (2 downto 0);
 
   -- Memory Stage Lines --
 
@@ -321,6 +371,7 @@ end component;
   signal 	M_write_data : std_logic_vector ( 31 downto 0);
   signal 	M_res_extended : std_logic_vector ( 31 downto 0);
   signal 	temp_data1_extended: std_logic_vector (19 downto 0);
+  signal        M_Opcode:std_logic_vector (4 downto 0);
  -- Write back signals --
  
   signal WB_write_addr_1, WB_write_addr_2: STD_LOGIC_VECTOR (2 downto 0);
@@ -421,20 +472,45 @@ begin
     E_port,
     D_read_addr_2,
     D_reg_addr,	
+    D_read_addr_1,
     D_alu_op,
     E_read_addr_2,	
     E_reg_addr,	
+    E_Rsrc,
     E_alu_op,
     D_eff_addr,
     E_eff_addr,
     D_pc_plus_one_flags,		
     E_pc_plus_one_flags,	
+    D_Opcode,
+    E_Opcode,
     clk,
     reset,
     decode_execute_buffer_enable
   );
   
   
+----------------------------------- Forwarding Unit----------------------------------D_read_addr_1
+
+HDU: ForwardUnit port map (	M_wb,WB_we_1,
+			  	M_wb2,
+				WB_we_2,
+				E_Rsrc,
+				E_Read_addr_2,
+				E_Opcode,
+				M_reg_addr,
+				WB_reg_addr,
+				M_read_addr_2,
+				WB_reg_addr2,
+				M_opcode,
+				Fwd_Mem_WB_1,
+				Fwd_Ex_Mem_1,
+				Fwd_Mem_WB_2,
+				Fwd_Ex_Mem_2,
+				HDU_LD_use);
+
+
+
 
 ----------------------------------- Execute Stage -----------------------------------
  
@@ -463,6 +539,10 @@ begin
 							M_eff_addr,
 							E_pc_plus_one_flags,
 							M_pc_plus_one_flags,
+							E_Opcode,
+							M_Opcode,
+							HDU_LD_use,
+							M_LD_Use,
 							clk, reset, ex_mem_enable);
 
 --------------------------------- Memory Write-Back Buffer ----------------------------  
@@ -473,6 +553,7 @@ begin
 					WB_res2, WB_res,
 					M_reg_addr, M_read_addr_2,
 					WB_reg_addr, WB_reg_addr2,
+					M_LD_Use, WB_LD_Use,
 					clk, reset, mem_wb_enable);
 
   WB_write_data_1 <= WB_res;

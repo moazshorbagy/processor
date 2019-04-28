@@ -9,6 +9,8 @@ PORT(
 	res2_next, res_next : OUT std_logic_vector(15 downto 0);
 	RegAddr_prev, RegAddr2_prev : IN std_logic_vector ( 2 downto 0);
 	RegAddr_next, RegAddr2_next : OUT std_logic_vector ( 2 downto 0);
+	LD_use_prev:in std_logic;
+	LD_use_next: out std_logic;
 	clk, rst, enable : IN std_logic
 );
 
@@ -47,7 +49,7 @@ res2_buffer : fallingReg generic map (16) port map (clk, rst, enable, res2_prev,
 res_buffer : fallingReg generic map (16) port map (clk, rst, enable, res_prev, res_next);
 RegAddr_buffer : fallingReg generic map (3) port map (clk, rst, enable, RegAddr_prev, RegAddr_next);
 RegAddr2_buffer : fallingReg generic map (3) port map (clk, rst, enable, RegAddr2_prev, RegAddr2_next);
-
+LD_Use_buffer :   fallingReg1bit port map (clk, rst, enable, LD_Use_prev, LD_Use_next);
 
 
 END arch;
