@@ -431,10 +431,10 @@ begin
   
 
   ------------------------------------ Forwarding Muxes Area --------------------------
-  Fwd_Mem_Wb1_Mux: Mux4 generic map (16) port map (D_read_data_1, WB_res, WB_res2,"0000000000000000", Fwd_Mem_Wb_1,D_first_Data1);
-  Fwd_Ex_Mem_Mux: Mux4 generic map (16) port map (D_first_Data1, M_res, M_res2,"0000000000000000", Fwd_Ex_Mem_1,D_final_Data1);
-  Fwd_Mem_Wb2_Mux: Mux4 generic map (16) port map (D_read_data_2, WB_res, WB_res2,"0000000000000000", Fwd_Mem_Wb_2,D_first_Data2);
-  Fwd_Ex_Mem2_Mux: Mux4 generic map (16) port map (D_first_Data2, M_res, M_res2,"0000000000000000", Fwd_Ex_Mem_2,D_final_Data2);
+  Fwd_Mem_Wb1_Mux: Mux4 generic map (16) port map (D_read_data_1, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_1,D_first_Data1);
+  Fwd_Ex_Mem_Mux: Mux4 generic map (16) port map (D_first_Data1, E_res, E_res2,"0000000000000000", Fwd_Ex_Mem_1,D_final_Data1);
+  Fwd_Mem_Wb2_Mux: Mux4 generic map (16) port map (D_read_data_2, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_2,D_first_Data2);
+  Fwd_Ex_Mem2_Mux: Mux4 generic map (16) port map (D_first_Data2, E_res, E_res2,"0000000000000000", Fwd_Ex_Mem_2,D_final_Data2);
   ------------------------------------ ID/Ex Buffer -----------------------------------
   
   decode_execute_buffer_enable <= '1';

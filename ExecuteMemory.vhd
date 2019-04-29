@@ -28,7 +28,7 @@ END ENTITY;
 
 ARCHITECTURE arch of ExecuteMemBuffer  IS
 
-COMPONENT Reg is
+COMPONENT fallingReg is
 generic(n: integer:=16);
   port(
     clk, rst, enable: in std_logic;
@@ -37,7 +37,7 @@ generic(n: integer:=16);
   );
 end COMPONENT;
 
-COMPONENT Reg1Bit is
+COMPONENT fallingReg1Bit is
 
   port(
     clk, rst, enable: in std_logic;
@@ -48,32 +48,32 @@ end COMPONENT;
 
 BEGIN
 
-RET_reg : Reg1bit  port map (clk, rst, enable, RET_prev, RET_next);
-MemW_reg : Reg1bit  port map (clk, rst, enable, MemW_prev, MemW_next);
-WB_reg : Reg1bit  port map (clk, rst, enable, WB_prev, WB_next);
-WB2_reg : Reg1bit  port map (clk, rst, enable, WB2_prev, WB2_next);
-stallFetch_reg : Reg1bit  port map (clk, rst, enable, stallFetch_prev, stallFetch_next);
-SPEn_reg : Reg1bit  port map (clk, rst, enable, SPEn_prev, SPEn_next);
-call_reg : Reg1bit  port map (clk, rst, enable, call_prev, call_next);
-regSrc_reg : Reg1bit  port map (clk, rst, enable, regSrc_prev, regSrc_next);
-outEnable_reg : Reg1bit  port map (clk, rst, enable, outEnable_prev, outEnable_next);
+RET_reg : fallingReg1Bit  port map (clk, rst, enable, RET_prev, RET_next);
+MemW_reg : fallingReg1Bit  port map (clk, rst, enable, MemW_prev, MemW_next);
+WB_reg : fallingReg1Bit  port map (clk, rst, enable, WB_prev, WB_next);
+WB2_reg : fallingReg1Bit  port map (clk, rst, enable, WB2_prev, WB2_next);
+stallFetch_reg : fallingReg1Bit  port map (clk, rst, enable, stallFetch_prev, stallFetch_next);
+SPEn_reg : fallingReg1Bit  port map (clk, rst, enable, SPEn_prev, SPEn_next);
+call_reg : fallingReg1Bit  port map (clk, rst, enable, call_prev, call_next);
+regSrc_reg : fallingReg1Bit  port map (clk, rst, enable, regSrc_prev, regSrc_next);
+outEnable_reg : fallingReg1Bit  port map (clk, rst, enable, outEnable_prev, outEnable_next);
 
-memAddrSrc_reg : Reg  generic map (2) port map (clk, rst, enable, memAddrSrc_prev, memAddrSrc_next);
-SPAdd_reg : Reg  generic map (2) port map (clk, rst, enable, SPAdd_prev, SPAdd_next);
+memAddrSrc_reg : fallingReg  generic map (2) port map (clk, rst, enable, memAddrSrc_prev, memAddrSrc_next);
+SPAdd_reg : fallingReg  generic map (2) port map (clk, rst, enable, SPAdd_prev, SPAdd_next);
 
-res1_reg : Reg  generic map (16) port map (clk, rst, enable, res1_prev, res1_next);
-res2_reg : Reg  generic map (16) port map (clk, rst, enable, res2_prev, res2_next);
+res1_reg : fallingReg  generic map (16) port map (clk, rst, enable, res1_prev, res1_next);
+res2_reg : fallingReg  generic map (16) port map (clk, rst, enable, res2_prev, res2_next);
 
-addr2_reg : Reg  generic map (3) port map (clk, rst, enable, addr2_prev, addr2_next);
-RegAddr_reg : Reg  generic map (3) port map (clk, rst, enable, RegAddr_prev, RegAddr_next);
+addr2_reg : fallingReg  generic map (3) port map (clk, rst, enable, addr2_prev, addr2_next);
+RegAddr_reg : fallingReg  generic map (3) port map (clk, rst, enable, RegAddr_prev, RegAddr_next);
 
-EA_reg : Reg  generic map (20) port map (clk, rst, enable, EA_prev, EA_next);
+EA_reg : fallingReg  generic map (20) port map (clk, rst, enable, EA_prev, EA_next);
 
-PC_flags_reg : Reg  generic map (32) port map (clk, rst, enable, PC_flags_prev, PC_flags_next);
+PC_flags_reg : fallingReg  generic map (32) port map (clk, rst, enable, PC_flags_prev, PC_flags_next);
 
-opcode_reg : Reg  generic map (5) port map (clk, rst, enable, opcode_prev, opcode_next);
+opcode_reg : fallingReg  generic map (5) port map (clk, rst, enable, opcode_prev, opcode_next);
 
-LD_use_reg:  Reg1bit port map (clk, rst, enable, LD_use_prev, LD_use_next);
+LD_use_reg:  fallingReg1Bit port map (clk, rst, enable, LD_use_prev, LD_use_next);
 
 
 

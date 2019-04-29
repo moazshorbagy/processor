@@ -15,7 +15,7 @@ architecture behavioral of fallingReg1Bit is begin
   process(clk, rst) begin
     if rst = '1' then
       q <= '0';
-    elsif (enable = '1' and rising_edge(clk)) then
+    elsif (enable = '1' and falling_edge(clk)) then
       q <= d;
     end if;
   end process;
