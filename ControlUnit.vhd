@@ -98,10 +98,10 @@ Else '0' ;
 mem_wr<= '1' When opcode = PUSHop OR opcode = STDop OR opcode = CALLop
 Else '0';
 
-setc <= '1' When opcode = SETCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop OR opcode = NOTop OR opcode = INCop OR opcode = DECop
+setc <= '1' When opcode = SETCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop  OR opcode = INCop OR opcode = DECop
 Else '0';
 
-clc <= '1' When opcode = CLRCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop OR opcode = NOTop OR opcode = INCop OR opcode = DECop
+clc <= '1' When opcode = CLRCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop  OR opcode = INCop OR opcode = DECop
 Else '0';
 
 zn <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop  OR opcode = SHLop OR opcode = SHRop
