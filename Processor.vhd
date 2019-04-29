@@ -309,8 +309,10 @@ end component;
   signal	D_call	: std_logic;
   signal	D_ret	: std_logic;
   signal 	D_opcode:  std_logic_vector (4 downto 0);
-  
-
+  signal 	D_first_data1:std_logic_vector(15 downto 0);  
+  signal 	D_final_data1:std_logic_vector(15 downto 0);  
+  signal 	D_first_data2:std_logic_vector(15 downto 0);  
+  signal 	D_final_data2:std_logic_vector(15 downto 0); 
  -- Execute Stage Lines --
 
   signal	E_wb	: std_logic;
@@ -427,7 +429,14 @@ begin
   control_unit : ControlUnit port map (D_wb,D_wb2 ,D_mem_wr , D_setc , D_clc , D_zn ,	D_alu_op , D_reg_src , D_alu_src_2 , D_output_enable , D_reg_addr_src , D_res_sel, D_data_2_sel , D_stall_fetch , D_sp_en, D_sp_add , 
 	D_mem_addr_src,	 D_pc_src ,D_call,D_ret, E_C, E_N, E_Z, D_op_code);
   
-   ----------------------------------- ID/Ex Buffer -----------------------------------
+
+  ------------------------------------ Forwarding Muxes Area --------------------------
+  Fwd_Mem_Wb1_Mux: Mux4 generic map (16) port map (D_read_data_1, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_1,D_first_Data1);
+  Fwd_Ex_Mem_Mux: Mux4 generic map (16) port map (D_first_Data1, M_res, M_res2,"0000000000000000", Fwd_Ex_Mem_1,D_final_Data1);
+  Fwd_Mem_Wb2_Mux: Mux4 generic map (16) port map (D_read_data_2, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_2,D_first_Data2);
+  Fwd_Ex_Mem2_Mux: Mux4 generic map (16) port map (D_first_Data2, M_res, M_res2,"0000000000000000", Fwd_Ex_Mem_2,D_final_Data2);
+  ------------------------------------ ID/Ex Buffer -----------------------------------
+  
   decode_execute_buffer_enable <= '1';
   id_ex_buff: DecodeExBuffer port map(
     D_pc_src,
@@ -464,8 +473,8 @@ begin
     E_mem_addr_src,	
     E_sp_add,	
     E_res_sel,
-    D_read_data_1,	
-    D_data_2,
+    D_final_Data1,	
+    D_final_Data2,
     D_port,
     E_read_data_1,	
     E_read_data_2,
