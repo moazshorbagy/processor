@@ -431,9 +431,9 @@ begin
   
 
   ------------------------------------ Forwarding Muxes Area --------------------------
-  Fwd_Mem_Wb1_Mux: Mux4 generic map (16) port map (D_read_data_1, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_1,D_first_Data1);
+  Fwd_Mem_Wb1_Mux: Mux4 generic map (16) port map (D_read_data_1, WB_res, WB_res2,"0000000000000000", Fwd_Mem_Wb_1,D_first_Data1);
   Fwd_Ex_Mem_Mux: Mux4 generic map (16) port map (D_first_Data1, M_res, M_res2,"0000000000000000", Fwd_Ex_Mem_1,D_final_Data1);
-  Fwd_Mem_Wb2_Mux: Mux4 generic map (16) port map (D_read_data_2, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_2,D_first_Data2);
+  Fwd_Mem_Wb2_Mux: Mux4 generic map (16) port map (D_read_data_2, WB_res, WB_res2,"0000000000000000", Fwd_Mem_Wb_2,D_first_Data2);
   Fwd_Ex_Mem2_Mux: Mux4 generic map (16) port map (D_first_Data2, M_res, M_res2,"0000000000000000", Fwd_Ex_Mem_2,D_final_Data2);
   ------------------------------------ ID/Ex Buffer -----------------------------------
   
@@ -491,7 +491,7 @@ begin
     E_eff_addr,
     D_pc_plus_one_flags,		
     E_pc_plus_one_flags,	
-    D_Opcode,
+    D_op_code,	--D_Opcode,			---------------------------------------------
     E_Opcode,
     clk,
     reset,
@@ -501,17 +501,18 @@ begin
   
 ----------------------------------- Forwarding Unit----------------------------------D_read_addr_1
 
-HDU: ForwardUnit port map (	M_wb,WB_we_1,
-			  	M_wb2,
-				WB_we_2,
-				E_Rsrc,
-				E_Read_addr_2,
-				E_Opcode,
+HDU: ForwardUnit port map (	E_wb,
+				M_wb,
+			  	E_wb2,
+				M_wb2,
+				D_read_addr_1,
+				D_Read_addr_2,
+				D_op_code,
+				E_reg_addr,
 				M_reg_addr,
-				WB_reg_addr,
+				E_read_addr_2,
 				M_read_addr_2,
-				WB_reg_addr2,
-				M_opcode,
+				E_Opcode,
 				Fwd_Mem_WB_1,
 				Fwd_Ex_Mem_1,
 				Fwd_Mem_WB_2,
