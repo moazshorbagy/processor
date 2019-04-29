@@ -18,8 +18,6 @@ PORT(
 	PC_flags_next : OUT std_logic_vector (31 downto 0);
 	opCode_prev:	IN std_logic_vector (4 downto 0);
 	opCode_next: 	Out std_logic_vector (4 downto 0);
-	LD_use_prev   : IN std_logic;
-	LD_use_next   : OUT std_logic;
 	clk, rst, enable : IN std_logic
 );
 
@@ -81,6 +79,6 @@ PC_flags_reg : fallingReg  generic map (32) port map (clk, rst, enable, PC_flags
 
 OP_code_reg  : fallingReg  generic map (5) port map (clk, rst, enable, opcode_prev, opcode_next);
 Rsrc_reg:      fallingReg  generic map (3) port map (clk, rst, enable, Rsrc_prev,   Rsrc_next);
-LD_use_reg:    fallingReg1bit port map (clk, rst, enable, LD_use_prev,LD_use_next);
+--LD_use_reg:    fallingReg1bit port map (clk, rst, enable, LD_use_prev,LD_use_next);
 
 END arch;

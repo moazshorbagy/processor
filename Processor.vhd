@@ -62,7 +62,7 @@ architecture structural of Processor is
   end component;
  
 
- component DecodeExBuffer IS
+COMPONENT DecodeExBuffer IS
 PORT(
 	PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev, MemW_prev, WB_prev, WB2_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
 	PCSrc_next, RET_next, ZN_next, setC_next, clC_next, MemW_next, WB_next, WB2_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
@@ -81,7 +81,7 @@ PORT(
 	clk, rst, enable : IN std_logic
 );
 
-END component;
+END COMPONENT;
   
   COMPONENT ExecuteMemBuffer IS
     PORT(
@@ -536,6 +536,7 @@ HDU: ForwardUnit port map (	M_wb,WB_we_1,
       
 
 --------------------------------- Execute Memory Buffer ----------------------------
+ex_mem_enable <= '1';
  ExecuteMemoryBuffer :  ExecuteMemBuffer port map (	E_ret, E_mem_wr, E_wb, E_wb2, E_stall_fetch, E_sp_en, E_call, E_reg_src, E_output_enable,
 							M_ret, M_mem_wr, M_wb, M_wb2, M_stall_fetch, M_sp_en, M_call, M_reg_src, M_output_enable,
 							E_mem_addr_src, E_sp_add,
