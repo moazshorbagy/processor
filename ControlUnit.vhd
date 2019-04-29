@@ -98,10 +98,10 @@ Else '0' ;
 mem_wr<= '1' When opcode = PUSHop OR opcode = STDop OR opcode = CALLop
 Else '0';
 
-setc <= '1' When opcode = SETCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop OR opcode = NOTop OR opcode = INCop
+setc <= '1' When opcode = SETCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop OR opcode = NOTop OR opcode = INCop OR opcode = DECop
 Else '0';
 
-clc <= '1' When opcode = CLRCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop OR opcode = NOTop OR opcode = INCop
+clc <= '1' When opcode = CLRCop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop OR opcode = NOTop OR opcode = INCop OR opcode = DECop
 Else '0';
 
 zn <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop  OR opcode = SHLop OR opcode = SHRop
@@ -116,7 +116,7 @@ Else "100" When opcode = ORop
 Else "101" When opcode = SHLop
 Else "110" When opcode = SHRop
 Else "111" When opcode = MULop
-Else "XXX";
+Else "XXX";	
 
 reg_src <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = OUTop OR opcode = INop OR opcode = MOVop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop OR opcode = SHLop OR opcode = SHRop OR opcode = LDMop
 Else '0' When opcode = POPop OR opcode = LDDop
