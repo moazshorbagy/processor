@@ -61,11 +61,11 @@ else 		"00";
 ---else 		"00";
 
 Fwd_Ex_Mem2<=	"01" when ((Ex_mem_regAddr=Id_Ex_addr2) AND (Ex_Mem_WB_reg='1'))	--For res  forwarding in most cases (WB='1')
-else 		"10" when (Ex_mem_addr2=ID_Ex_Rsrc) AND (Ex_Mem_WB2_reg='1')  --For res2 forwarding in case of multiplication (WB2='1') 
+else 		"10" when (Ex_mem_addr2=ID_Ex_addr2) AND (Ex_Mem_WB2_reg='1')  --For res2 forwarding in case of multiplication (WB2='1') 
 else "00";
 
 Fwd_Mem_WB2<=	"01" when ((Mem_WB_regAddr=Id_Ex_addr2) AND (Mem_WB_WB_reg='1'))   --For res  forwarding in most cases (WB='1')
-else 	     	"10" when (Mem_WB_addr2=Id_Ex_Rsrc)    AND (Mem_WB_WB2_reg='1')  --For res2 forwarding in case of multiplication (WB2='1')
+else 	     	"10" when (Mem_WB_addr2=Id_Ex_addr2)    AND (Mem_WB_WB2_reg='1')  --For res2 forwarding in case of multiplication (WB2='1')
 else 		"00";
 
 END ARCHITECTURE;
