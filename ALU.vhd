@@ -66,7 +66,7 @@ else '0';
 Z<='1' when ((result1="0000000000000000") AND ((alu_op="000")OR(alu_op="001") OR (alu_op="010")OR (alu_op="011")OR(alu_op="100")OR (alu_op="101")OR (alu_op="110")))OR ((result1="0000000000000000")AND (result2="0000000000000000")AND (alu_op="111"))
 else '0';
 
-N<='1' when (result1(m-1)='1') AND ((alu_op="000") OR (alu_op="001") OR (alu_op="010")OR (alu_op="011")OR(alu_op="100")OR (alu_op="101")OR (alu_op="110"))
-else '1' when (result2(m-1)='1')And (alu_op="111")
+N<='1' when (result1(m-1)='1') AND ((alu_op="000") OR (alu_op="001") OR (alu_op="010")OR (alu_op="011")OR(alu_op="100")OR (alu_op="101")OR (alu_op="110") OR (alu_op="111"))
+--else '1' when (result2(m-1)='1')And (alu_op="111")
 else '0';
 end Architecture; 
