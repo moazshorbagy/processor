@@ -39,7 +39,7 @@ else (data1 AND data2) when (alu_op="011")
 else (data1 OR data2) when (alu_op="100")
 else (std_logic_vector(unsigned(data1) SLL  to_integer(unsigned(data2(3 downto 0)))) ) when (alu_op="101")
 else (std_logic_vector(unsigned(data1) SRL  to_integer(unsigned(data2(3 downto 0)))) ) when (alu_op="110")
-else (mult(m-1 downto 0)) when (alu_op="111");
+else (mult(2*m-1 downto m)) when (alu_op="111");
 
 
 result1<=(Not data1) when (alu_op="000")
@@ -49,12 +49,12 @@ else (data1 AND data2) when (alu_op="011")
 else (data1 OR data2) when (alu_op="100")
 else (std_logic_vector(unsigned(data1) SLL  to_integer(unsigned(data2(3 downto 0)))) ) when (alu_op="101")	--SHL
 else (std_logic_vector(unsigned(data1) SRL  to_integer(unsigned(data2(3 downto 0)))) ) when (alu_op="110")	--SHR
-else (mult(m-1 downto 0)) when (alu_op="111");
+else (mult(2*m-1 downto m)) when (alu_op="111");
 
-res2<=mult(2*m-1 downto m) when (alu_op="111")
+res2<=mult(m-1 downto 0) when (alu_op="111")
 else (others=>'0');
 
-result2<=mult(2*m-1 downto m) when (alu_op="111")
+result2<=mult(m-1 downto 0) when (alu_op="111")
 else (others=>'0');
 
 C <= add_out(m) when (alu_op="001")

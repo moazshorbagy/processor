@@ -313,6 +313,7 @@ end component;
   signal 	D_final_data1:std_logic_vector(15 downto 0);  
   signal 	D_first_data2:std_logic_vector(15 downto 0);  
   signal 	D_final_data2:std_logic_vector(15 downto 0); 
+  signal 	D_final_data2_temp:std_logic_vector(15 downto 0); 
  -- Execute Stage Lines --
 
   signal	E_wb	: std_logic;
@@ -422,7 +423,7 @@ begin
 
   reg_src_mux: Mux2 generic map (16) port map(D_mem_data, WB_res, D_reg_src, WB_write_data_1);
   reg_addr_src_mux: Mux2 generic map (3) port map(D_read_addr_1, D_read_addr_2, D_reg_addr_src, D_reg_addr);
-  data_2_mux: Mux2 generic map (16) port map(D_read_data_2, D_shift_val, D_data_2_sel, D_data_2);
+  
 
   register_file_unit: RegFile port map(clk, reset, WB_write_addr_1, WB_write_addr_2, WB_write_data_1, WB_write_data_2, WB_we_1, WB_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
   
@@ -434,7 +435,9 @@ begin
   Fwd_Mem_Wb1_Mux: Mux4 generic map (16) port map (D_read_data_1, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_1,D_first_Data1);
   Fwd_Ex_Mem_Mux: Mux4 generic map (16) port map (D_first_Data1, E_res, E_res2,"0000000000000000", Fwd_Ex_Mem_1,D_final_Data1);
   Fwd_Mem_Wb2_Mux: Mux4 generic map (16) port map (D_read_data_2, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_2,D_first_Data2);
-  Fwd_Ex_Mem2_Mux: Mux4 generic map (16) port map (D_first_Data2, E_res, E_res2,"0000000000000000", Fwd_Ex_Mem_2,D_final_Data2);
+  Fwd_Ex_Mem2_Mux: Mux4 generic map (16) port map (D_first_Data2, E_res, E_res2,"0000000000000000", Fwd_Ex_Mem_2,D_final_Data2_temp);
+
+  data_2_mux: Mux2 generic map (16) port map(D_final_Data2_temp, D_shift_val, D_data_2_sel, D_final_Data2);
   ------------------------------------ ID/Ex Buffer -----------------------------------
   
   decode_execute_buffer_enable <= '1';

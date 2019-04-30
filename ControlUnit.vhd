@@ -130,8 +130,8 @@ output_enable <= '1' When opCode = OUTop
 Else '0';
 
 
-reg_addr_src <= '1' When opCode = MOVop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop  OR opcode = ANDop  OR opcode = ORop
-Else '0' When opCode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = OUTop OR opcode = INop OR opcode = SHLop OR opcode = SHRop OR opcode = POPop OR opcode = LDMop OR opcode = LDDop OR opcode = STDop
+reg_addr_src <= '1' When opCode = MOVop OR opcode = ADDop OR opcode = SUBop  OR opcode = ANDop  OR opcode = ORop
+Else '0' When opCode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = OUTop OR opcode = INop OR opcode = SHLop OR opcode = SHRop OR opcode = POPop OR opcode = LDMop OR opcode = LDDop OR opcode = STDop OR opcode = MULop
 Else 'X';
 
 res_sel <= "00" When opcode = NOTop  OR opcode = INCop  OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop OR opcode = SHLop OR opcode = SHRop
