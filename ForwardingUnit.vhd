@@ -41,7 +41,7 @@ constant ORop  : std_logic_vector(4 downto 0):= "01101";
 
 BEGIN
 
-LD_use<='1' when EX_Mem_OpCode="11101" and ((Ex_mem_regAddr=ID_Ex_Rsrc) OR ((Ex_mem_regAddr=ID_Ex_addr2) AND (Id_Ex_Opcode=ANDop OR Id_Ex_Opcode=ORop OR Id_Ex_Opcode=SUBop OR Id_Ex_Opcode=ADDop OR Id_Ex_Opcode=MULOp)))					
+LD_use<='1' when (EX_Mem_OpCode="11101" OR EX_Mem_OpCode="10001"  ) and ((Ex_mem_regAddr=ID_Ex_Rsrc) OR ((Ex_mem_regAddr=ID_Ex_addr2) AND (Id_Ex_Opcode=ANDop OR Id_Ex_Opcode=ORop OR Id_Ex_Opcode=SUBop OR Id_Ex_Opcode=ADDop OR Id_Ex_Opcode=MULOp)))					
 else '0';
 
 Fwd_Ex_Mem1<=	"01" when ((Ex_mem_regAddr=ID_Ex_Rsrc) AND (Ex_Mem_WB_reg='1'))	--For res  forwarding in most cases (WB='1')

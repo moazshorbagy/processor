@@ -18,6 +18,8 @@ PORT(
 	PC_flags_next : OUT std_logic_vector (31 downto 0);
 	opCode_prev:	IN std_logic_vector (4 downto 0);
 	opCode_next: 	Out std_logic_vector (4 downto 0);
+	buffered_decode_exexute_buffer_reset_prev : in std_logic;
+	buffered_decode_exexute_buffer_reset_next : out std_logic;
 	clk, rst, enable : IN std_logic
 );
 
@@ -60,6 +62,8 @@ call_reg : fallingReg1bit  port map (clk, rst, enable, call_prev, call_next);
 regSrc_reg : fallingReg1bit  port map (clk, rst, enable, regSrc_prev, regSrc_next);
 ALUSrc2_reg : fallingReg1bit  port map (clk, rst, enable, ALUSrc2_prev, ALUSrc2_next);
 outEnable_reg : fallingReg1bit  port map (clk, rst, enable, outEnable_prev, outEnable_next);
+
+buffered_reset_reg : fallingReg1bit  port map (clk, rst, enable, buffered_decode_exexute_buffer_reset_prev, buffered_decode_exexute_buffer_reset_next);
 
 memAddrSrc_reg : fallingReg  generic map (2) port map (clk, rst, enable, memAddrSrc_prev, memAddrSrc_next);
 SPAdd_reg : fallingReg  generic map (2) port map (clk, rst, enable, SPAdd_prev, SPAdd_next);

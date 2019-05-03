@@ -78,6 +78,8 @@ PORT(
 	PC_flags_next : OUT std_logic_vector (31 downto 0);
 	opCode_prev:	IN std_logic_vector (4 downto 0);
 	opCode_next: 	Out std_logic_vector (4 downto 0);
+	buffered_decode_exexute_buffer_reset_prev : in std_logic;
+	buffered_decode_exexute_buffer_reset_next : out std_logic;
 	clk, rst, enable : IN std_logic
 );
 
@@ -114,6 +116,8 @@ END COMPONENT;
 	res2_next, res_next : OUT std_logic_vector(15 downto 0);
 	RegAddr_prev, RegAddr2_prev : IN std_logic_vector ( 2 downto 0);
 	RegAddr_next, RegAddr2_next : OUT std_logic_vector ( 2 downto 0);
+	memory_out_prev : IN std_logic_vector (15 downto 0);
+	memory_out_next : OUT std_logic_vector (15 downto 0);
 	LD_use_prev:in std_logic;
 	LD_use_next: out std_logic;
 	clk, rst, enable : IN std_logic
@@ -251,6 +255,7 @@ end component;
   signal D_port, D_mem_data, D_read_data_1, D_read_data_2, D_data_2: std_logic_vector (15 downto 0);
   signal D_instr: std_logic_vector (31 downto 0);
   signal D_op_code: std_logic_vector (4 downto 0);
+  signal D_before_NOP_mux_op_code: std_logic_vector (4 downto 0);
   signal D_shift_val:  std_logic_vector (15 downto 0);
   signal D_read_addr_1, D_read_addr_2, D_write_addr_1, D_write_addr_2, D_reg_addr : std_logic_vector (2 downto 0);
   signal D_we_1, D_we_2: std_logic;
@@ -283,6 +288,11 @@ end component;
   signal id_ex_enable: std_logic;
   signal ex_mem_enable: std_logic;
   signal mem_wb_enable: std_logic;  
+
+  signal ex_mem_rst : std_logic;
+  signal decode_execute_buffer_reset : std_logic;
+  signal buffered_decode_exexute_buffer_reset : std_logic;
+  
 
   signal flags_regs_enable : std_logic;
   
@@ -366,6 +376,7 @@ end component;
   signal	M_call	: std_logic;
   signal	M_ret	: std_logic;
   signal 	M_res : std_logic_vector (15 downto 0);
+  signal 	M_res_muxed : std_logic_vector (15 downto 0);
   signal 	M_res2 : std_logic_vector ( 15 downto 0);
   signal 	M_read_addr_2 : std_logic_vector (2 downto 0);
   signal 	M_reg_addr : std_logic_vector (2 downto 0);
@@ -375,6 +386,8 @@ end component;
   signal 	M_res_extended : std_logic_vector ( 31 downto 0);
   signal 	temp_data1_extended: std_logic_vector (19 downto 0);
   signal        M_Opcode:std_logic_vector (4 downto 0);
+
+  
  -- Write back signals --
  
   signal WB_write_addr_1, WB_write_addr_2: STD_LOGIC_VECTOR (2 downto 0);
@@ -390,23 +403,28 @@ end component;
   signal WB_reg_addr : std_logic_vector (2 downto 0);
   signal WB_reg_addr2 : std_logic_vector (2 downto 0);
 
+  signal WB_memory_data : std_logic_vector (15 downto 0);
+
 
 -- begin architecture definition --
 begin
   
   ----------------------------------- FETCH STAGE -----------------------------------
   M_write_enable <= '0';
-  stall_fetch <= '0';
+  stall_fetch <= M_stall_fetch OR HDU_LD_use;
   W32 <= M_call;
   FAT <= mem_out(31) and mem_out(30) and mem_out(29);
   M_res_extended <= "0000000000000000" & M_res;
   Mux_M_write_data : Mux2 generic map (32) port map (M_res_extended, M_pc_plus_one_flags, M_call, M_write_data );
   temp_data1_extended<="0000"&D_read_data_1;
-  address_control_unit : Address_Module port map(M_stall_fetch, FAT, clk, reset, M_sp_add , M_eff_addr, M_mem_addr_src, M_sp_en, D_pc_src, M_ret, mem_out(31 downto 12), temp_data1_extended, address);
-  memory_unit : Memory port map(clk, M_write_enable, W32, address, M_write_data, mem_out);
+  address_control_unit : Address_Module port map(stall_fetch, FAT, clk, reset, M_sp_add , M_eff_addr, M_mem_addr_src, M_sp_en, D_pc_src, M_ret, mem_out(31 downto 12), temp_data1_extended, address);
+  memory_unit : Memory port map(clk, M_mem_wr, W32, address, M_write_data, mem_out);
     
+
+  memory_reg_src_mux: Mux2 generic map (16) port map(mem_out (31 downto 16) , M_res, M_reg_src, M_res_muxed);
+
   ----------------------------------- IF/ID Buffer -----------------------------------
-  fetch_decode_buffer_enable <= '1';
+  fetch_decode_buffer_enable <= NOT HDU_LD_use;
   if_id_buff: FetchDecodeBuffer port map(F_pc_plus_one, D_pc_plus_one, in_port, D_port, mem_out, D_instr, clk, reset, fetch_decode_buffer_enable);
 
 
@@ -417,11 +435,11 @@ begin
   ----------------------------------- DECODE STAGE -----------------------------------
 
   
-  splitter: ResolveInstr port map(D_instr, D_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
+  splitter: ResolveInstr port map(D_instr, D_before_NOP_mux_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
 
+  NOP_MUX: Mux2 generic map (5) port map(D_before_NOP_mux_op_code,"00000", WB_NOP, D_op_code);
 
-
-  reg_src_mux: Mux2 generic map (16) port map(D_mem_data, WB_res, D_reg_src, WB_write_data_1);
+  reg_src_mux: Mux2 generic map (16) port map(WB_memory_data, WB_res, WB_reg_src, WB_write_data_1);
   reg_addr_src_mux: Mux2 generic map (3) port map(D_read_addr_1, D_read_addr_2, D_reg_addr_src, D_reg_addr);
   
 
@@ -432,16 +450,17 @@ begin
   
 
   ------------------------------------ Forwarding Muxes Area --------------------------
-  Fwd_Mem_Wb1_Mux: Mux4 generic map (16) port map (D_read_data_1, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_1,D_first_Data1);
+  Fwd_Mem_Wb1_Mux: Mux4 generic map (16) port map (D_read_data_1, M_res_muxed, M_res2,"0000000000000000", Fwd_Mem_Wb_1,D_first_Data1);
   Fwd_Ex_Mem_Mux: Mux4 generic map (16) port map (D_first_Data1, E_res, E_res2,"0000000000000000", Fwd_Ex_Mem_1,D_final_Data1);
-  Fwd_Mem_Wb2_Mux: Mux4 generic map (16) port map (D_read_data_2, M_res, M_res2,"0000000000000000", Fwd_Mem_Wb_2,D_first_Data2);
+  Fwd_Mem_Wb2_Mux: Mux4 generic map (16) port map (D_read_data_2, M_res_muxed, M_res2,"0000000000000000", Fwd_Mem_Wb_2,D_first_Data2);
   Fwd_Ex_Mem2_Mux: Mux4 generic map (16) port map (D_first_Data2, E_res, E_res2,"0000000000000000", Fwd_Ex_Mem_2,D_final_Data2_temp);
 
   data_2_mux: Mux2 generic map (16) port map(D_final_Data2_temp, D_shift_val, D_data_2_sel, D_final_Data2);
   ------------------------------------ ID/Ex Buffer -----------------------------------
   
-  decode_execute_buffer_enable <= '1';
-  id_ex_buff: DecodeExBuffer port map(
+  decode_execute_buffer_enable <= '1';--NOT HDU_LD_use;
+  --decode_execute_buffer_reset <= buffered_decode_exexute_buffer_reset; --reset OR (HDU_LD_use AND (NOT  clk)) ;
+id_ex_buff: DecodeExBuffer port map(
     D_pc_src,
     D_ret,
     D_zn,
@@ -496,8 +515,10 @@ begin
     E_pc_plus_one_flags,	
     D_op_code,	--D_Opcode,			---------------------------------------------
     E_Opcode,
+    HDU_LD_use,
+    decode_execute_buffer_reset,
     clk,
-    reset,
+    decode_execute_buffer_reset,
     decode_execute_buffer_enable
   );
   
@@ -541,6 +562,7 @@ HDU: ForwardUnit port map (	E_wb,
 
 --------------------------------- Execute Memory Buffer ----------------------------
 ex_mem_enable <= '1';
+ex_mem_rst <= reset;--OR (HDU_LD_use AND clk) ;
  ExecuteMemoryBuffer :  ExecuteMemBuffer port map (	E_ret, E_mem_wr, E_wb, E_wb2, E_stall_fetch, E_sp_en, E_call, E_reg_src, E_output_enable,
 							M_ret, M_mem_wr, M_wb, M_wb2, M_stall_fetch, M_sp_en, M_call, M_reg_src, M_output_enable,
 							E_mem_addr_src, E_sp_add,
@@ -557,7 +579,7 @@ ex_mem_enable <= '1';
 							M_Opcode,
 							HDU_LD_use,
 							M_LD_Use,
-							clk, reset, ex_mem_enable);
+							clk, ex_mem_rst, ex_mem_enable);
 
 --------------------------------- Memory Write-Back Buffer ----------------------------  
   mem_wb_enable <= '1';
@@ -567,10 +589,12 @@ ex_mem_enable <= '1';
 					WB_res2, WB_res,
 					M_reg_addr, M_read_addr_2,
 					WB_reg_addr, WB_reg_addr2,
+					mem_out(31 downto 16),
+					WB_memory_data,
 					M_LD_Use, WB_LD_Use,
 					clk, reset, mem_wb_enable);
 
-  WB_write_data_1 <= WB_res;
+  --WB_write_data_1 <= WB_res;
   WB_write_data_2 <= WB_res2;
   WB_write_addr_1 <= WB_reg_addr;
   WB_write_addr_2 <= WB_reg_addr2;
