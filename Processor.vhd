@@ -260,6 +260,9 @@ end component;
   signal D_read_addr_1, D_read_addr_2, D_write_addr_1, D_write_addr_2, D_reg_addr : std_logic_vector (2 downto 0);
   signal D_we_1, D_we_2: std_logic;
   signal D_pc_plus_one_flags: std_logic_vector (31 downto 0);
+
+  signal NOP_mux_selector : std_logic ;
+
   -- Execute stage signals --
   signal  E_port, E_read_data_1, E_read_data_2 : std_logic_vector (15 downto 0);
   signal E_read_addr_2,	E_reg_addr : std_logic_vector (2 downto 0);
@@ -416,7 +419,7 @@ begin
   FAT <= mem_out(31) and mem_out(30) and mem_out(29);
   M_res_extended <= "0000000000000000" & M_res;
   Mux_M_write_data : Mux2 generic map (32) port map (M_res_extended, M_pc_plus_one_flags, M_call, M_write_data );
-  temp_data1_extended<="0000"&D_read_data_1;
+  temp_data1_extended<="0000"&D_final_Data1;
   address_control_unit : Address_Module port map(stall_fetch, FAT, clk, reset, M_sp_add , M_eff_addr, M_mem_addr_src, M_sp_en, D_pc_src, M_ret, mem_out(31 downto 12), temp_data1_extended, address);
   memory_unit : Memory port map(clk, M_mem_wr, W32, address, M_write_data, mem_out);
     
@@ -436,8 +439,11 @@ begin
 
   
   splitter: ResolveInstr port map(D_instr, D_before_NOP_mux_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
+  
 
-  NOP_MUX: Mux2 generic map (5) port map(D_before_NOP_mux_op_code,"00000", WB_NOP, D_op_code);
+  NOP_mux_selector <= WB_NOP OR E_pc_src;
+  NOP_MUX: Mux2 generic map (5) port map(D_before_NOP_mux_op_code,"00000", NOP_mux_selector, D_op_code);
+	
 
   reg_src_mux: Mux2 generic map (16) port map(WB_memory_data, WB_res, WB_reg_src, WB_write_data_1);
   reg_addr_src_mux: Mux2 generic map (3) port map(D_read_addr_1, D_read_addr_2, D_reg_addr_src, D_reg_addr);
