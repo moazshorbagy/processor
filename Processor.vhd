@@ -240,6 +240,14 @@ end component;
   end COMPONENT;
 
 
+  COMPONENT call_counter IS
+
+	PORT( clk : IN std_logic;
+		en:in std_logic;
+		rst:in std_logic;
+		  z : OUT std_logic_vector(1 downto 0));
+  END COMPONENT ;
+
 -- types declaration --
 
   
@@ -262,6 +270,8 @@ end component;
   signal D_pc_plus_one_flags: std_logic_vector (31 downto 0);
 
   signal NOP_mux_selector : std_logic ;
+  signal call_counter_out : std_logic_vector ( 1 downto 0);
+
 
   -- Execute stage signals --
   signal  E_port, E_read_data_1, E_read_data_2 : std_logic_vector (15 downto 0);
@@ -436,12 +446,14 @@ begin
 
   
   ----------------------------------- DECODE STAGE -----------------------------------
+ 
+  call_counter_comp : call_counter port map(clk, D_call, reset,call_counter_out);
 
   
   splitter: ResolveInstr port map(D_instr, D_before_NOP_mux_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
   
 
-  NOP_mux_selector <= WB_NOP OR E_pc_src;
+  NOP_mux_selector <= WB_NOP OR E_pc_src OR call_counter_out (0) OR call_counter_out(1) ;
   NOP_MUX: Mux2 generic map (5) port map(D_before_NOP_mux_op_code,"00000", NOP_mux_selector, D_op_code);
 	
 
