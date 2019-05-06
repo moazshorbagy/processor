@@ -64,8 +64,8 @@ architecture structural of Processor is
 
 COMPONENT DecodeExBuffer IS
 PORT(
-	PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev, MemW_prev, WB_prev, WB2_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
-	PCSrc_next, RET_next, ZN_next, setC_next, clC_next, MemW_next, WB_next, WB2_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
+	PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev,clN_prev,clZ_prev, MemW_prev, WB_prev, WB2_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
+	PCSrc_next, RET_next, ZN_next, setC_next, clC_next,clN_next,clZ_next, MemW_next, WB_next, WB2_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
 	memAddrSrc_prev,  SPAdd_prev, resSel_prev : IN std_logic_vector (1 downto 0 );
 	memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
 	Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
@@ -130,7 +130,7 @@ END COMPONENT;
 
 component ControlUnit IS
 PORT   (
-		 wb,wb2, mem_wr , setc , clc , zn : OUT std_logic;
+		 wb,wb2, mem_wr , setc , clc ,cln,clz, zn : OUT std_logic;
 		
 		 alu_op : OUT std_logic_vector( 2 DOWNTO 0);
 		 
@@ -316,6 +316,8 @@ end component;
   signal	D_mem_wr	: std_logic;
   signal	D_setc	: std_logic;
   signal	D_clc	: std_logic;
+    signal	D_cln	: std_logic;
+	  signal	D_clz	: std_logic;
   signal	D_zn	: std_logic;
   signal	D_alu_op	: std_logic_vector (2 downto 0);
   signal	D_reg_src	: std_logic;
@@ -344,6 +346,8 @@ end component;
   signal	E_mem_wr	: std_logic;
   signal	E_setc	: std_logic;
   signal	E_clc	: std_logic;
+    signal	E_cln	: std_logic;
+	  signal	E_clz	: std_logic;
   signal	E_zn	: std_logic;
   signal	E_alu_op	: std_logic_vector (2 downto 0);
   signal	E_reg_src	: std_logic;
@@ -463,7 +467,7 @@ begin
 
   register_file_unit: RegFile port map(clk, reset, WB_write_addr_1, WB_write_addr_2, WB_write_data_1, WB_write_data_2, WB_we_1, WB_we_2, D_read_addr_1, D_read_addr_2, D_read_data_1, D_read_data_2);
   
-  control_unit : ControlUnit port map (D_wb,D_wb2 ,D_mem_wr , D_setc , D_clc , D_zn ,	D_alu_op , D_reg_src , D_alu_src_2 , D_output_enable , D_reg_addr_src , D_res_sel, D_data_2_sel , D_stall_fetch , D_sp_en, D_sp_add , 
+  control_unit : ControlUnit port map (D_wb,D_wb2 ,D_mem_wr , D_setc , D_clc,D_cln,D_clz , D_zn ,	D_alu_op , D_reg_src , D_alu_src_2 , D_output_enable , D_reg_addr_src , D_res_sel, D_data_2_sel , D_stall_fetch , D_sp_en, D_sp_add , 
 	D_mem_addr_src,	 D_pc_src ,D_call,D_ret, E_C, E_N, E_Z, D_op_code);
   
 
@@ -484,6 +488,8 @@ id_ex_buff: DecodeExBuffer port map(
     D_zn,
     D_setc,
     D_clc,
+	D_cln,
+	D_clz,
     D_mem_wr,
     D_wb,
     D_wb2,
@@ -498,6 +504,8 @@ id_ex_buff: DecodeExBuffer port map(
     E_zn,
     E_setc,
     E_clc,
+	E_cln,
+	E_clz,
     E_mem_wr,
     E_wb,
     E_wb2,

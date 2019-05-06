@@ -4,8 +4,8 @@ USE IEEE.std_logic_1164.all;
 
 ENTITY DecodeExBuffer IS
 PORT(
-	PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev, MemW_prev, WB_prev, WB2_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
-	PCSrc_next, RET_next, ZN_next, setC_next, clC_next, MemW_next, WB_next, WB2_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
+	PCSrc_prev, RET_prev, ZN_prev, setC_prev, clC_prev,clN_prev , clZ_prev, MemW_prev, WB_prev, WB2_prev, stallFetch_prev, SPEn_prev, call_prev, regSrc_prev, ALUSrc2_prev, outEnable_prev : IN std_logic;
+	PCSrc_next, RET_next, ZN_next, setC_next, clC_next,clN_next ,clZ_next, MemW_next, WB_next, WB2_next, stallFetch_next, SPEn_next, call_next, regSrc_next, ALUSrc2_next, outEnable_next : OUT std_logic;
 	memAddrSrc_prev,  SPAdd_prev, resSel_prev : IN std_logic_vector (1 downto 0 );
 	memAddrSrc_next,  SPAdd_next, resSel_next : OUT std_logic_vector (1 downto 0 );
 	Data1_prev, Data2_prev, Port_prev : IN std_logic_vector (15 downto 0);
@@ -53,6 +53,8 @@ RET_reg : fallingReg1bit  port map (clk, rst, enable, RET_prev, RET_next);
 ZN_reg : fallingReg1bit  port map (clk, rst, enable, ZN_prev, ZN_next);
 setC_reg : fallingReg1bit  port map (clk, rst, enable, setC_prev, setC_next);
 clC_reg : fallingReg1bit  port map (clk, rst, enable, clC_prev, clC_next);
+clN_reg : fallingReg1bit  port map (clk, rst, enable, clN_prev, clN_next);
+clZ_reg : fallingReg1bit  port map (clk, rst, enable, clZ_prev, clZ_next);
 MemW_reg : fallingReg1bit  port map (clk, rst, enable, MemW_prev, MemW_next);
 WB_reg : fallingReg1bit  port map (clk, rst, enable, WB_prev, WB_next);
 WB2_reg : fallingReg1bit  port map (clk, rst, enable, WB2_prev, WB2_next);

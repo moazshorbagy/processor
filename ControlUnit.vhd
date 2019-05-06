@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 ENTITY ControlUnit IS
 PORT   (
-		 wb, wb2 ,mem_wr , setc , clc , zn : OUT std_logic;
+		 wb, wb2 ,mem_wr , setc , clc ,cln,clz, zn : OUT std_logic;
 		
 		 alu_op : OUT std_logic_vector( 2 DOWNTO 0);
 		 
@@ -101,7 +101,8 @@ Else '0';
 setc <= '1' When opcode = SETCop OR opcode = ADDop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop  OR opcode = INCop OR opcode = DECop
 Else '0';
 
-clc <= '1' When opcode = CLRCop OR opcode = ADDop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop  OR opcode = INCop OR opcode = DECop
+
+clc <= '1' When opcode = CLRCop OR opcode = ADDop OR opcode = SUBop OR opcode = SHLop OR opcode = SHRop  OR opcode = INCop OR opcode = DECop OR (c_flag AND jc) = '1'
 Else '0';
 
 zn <= '1' When opcode = NOTop OR opcode = INCop OR opcode = DECop OR opcode = ADDop OR opcode = MULop OR opcode = SUBop OR opcode = ANDop OR opcode = ORop  OR opcode = SHLop OR opcode = SHRop
@@ -179,7 +180,8 @@ Else '0';
 ret<= '1' When opcode = RETop OR opcode = RTIop
 Else '0' ;
 
-
+cln <= (n_flag and jn);
+clz <=  (z_flag and jz);
 pc_src <= callsig or j or (z_flag and jz) or (n_flag and jn) or (c_flag and jc);
 
 call <= callsig;
