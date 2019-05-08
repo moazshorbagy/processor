@@ -584,7 +584,7 @@ HDU: ForwardUnit port map (	E_wb,
 
   -- The flags module getting input from the ALU and the control unit
   flags_regs_enable <= '1';
-  D_flags_component : flags port map (E_ALU_C, E_ALU_Z, E_ALU_N, E_setc, E_clc, E_zn, clk, E_clz, E_cln, reset, flags_regs_enable, E_C, E_Z, E_N);
+  D_flags_component : flags port map (w_c, w_z, w_n, setc, clc, zn, clk, E_clz, E_cln, reset, flags_regs_enable, E_C, E_Z, E_N);
 
   -- The mux selecting res from ALU, DATA1, PORT, and Immediate data
   res_mux : mux4 generic map (16) port map (E_ALU_res, E_read_data_1, E_port, E_eff_addr(15 downto 0), E_res_sel, E_res);
