@@ -7,7 +7,7 @@ USE IEEE.numeric_std.all;
 ENTITY memory IS
 	
 	PORT(
-		clk : IN std_logic;
+		clk, rst : IN std_logic;
 		we  : IN std_logic;
 		w32 : IN std_logic;
 		address : IN  std_logic_vector(19 DOWNTO 0);
@@ -27,8 +27,8 @@ ARCHITECTURE memory_architecture OF memory IS
 				IF rising_edge(clk) THEN  
 					IF we = '1' THEN
 						IF w32 = '1' THEN
-							ram(to_integer(unsigned(address))) <= datain ( 31 downto 16);
-							ram(to_integer(unsigned(address)+1)) <= datain ( 15 downto 0);
+							ram(to_integer(unsigned(address)-1)) <= datain ( 31 downto 16);
+							ram(to_integer(unsigned(address))) <= datain ( 15 downto 0);
 						ELSE
 							ram(to_integer(unsigned(address))) <= datain ( 15 downto 0);
 						END IF;
@@ -37,7 +37,8 @@ ARCHITECTURE memory_architecture OF memory IS
 			
 		END PROCESS;
 		data1 <= ram(to_integer(unsigned(address)));
-			data2 <= ram(to_integer(unsigned(address)+1));
-			dataout <= data1 & data2;
+		data2 <= ram(to_integer(unsigned(address)+1));
+		dataout <= "0000000000000000" & ram(0) when rst = '1'
+			else data1 & data2;
 		
 END memory_architecture;

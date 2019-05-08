@@ -24,7 +24,7 @@ counting<="00";
 z<="00";
 else
 	if (clk'event and clk='1' and en='1') then
-		counting<="10";
+		counting<="11";
 
 	elsif (clk'event and clk='1' and (counting /= "00")) then
 

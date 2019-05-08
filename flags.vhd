@@ -7,7 +7,7 @@ PORT(
 	-- ALUC, ALUZ, ALUN : flags coming from the ALU
 	-- setC, clC, ZN : signals coming from the control unit
 	-- C, Z, N : Output flags
-	ALUC, ALUZ, ALUN, setC, clC, ZN, clk, rst, enable: IN std_logic;
+	ALUC, ALUZ, ALUN, setC, clC, ZN, clk, z_rst, n_rst, rst, enable: IN std_logic;
 	C, Z, N : OUT std_logic
 );
 
@@ -55,10 +55,12 @@ BEGIN
 C_input_mux_sel <= setC & clC; 
 C_input_mux : Mux41bit port map ( temp1,'0','1',ALUC,C_input_mux_sel,C_in);
 
-N_in <= temp2 when ZN = '0'
+N_in <= temp2 when ZN = '0' and n_rst='0'
+	else '0' when n_rst='1'
 	else ALUN;
 
-Z_in <= temp3 when ZN = '0'
+Z_in <= temp3 when ZN = '0' and z_rst = '0'
+	else '0' when z_rst='1'
 	else ALUZ;
 
 -- Concatenate the input flags

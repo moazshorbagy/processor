@@ -16,7 +16,7 @@ architecture structural of Processor is
 
   component memory is
     port(
-      clk : IN std_logic;
+      clk, rst : IN std_logic;
 		  we  : IN std_logic;
 		  w32 : IN std_logic;
 		  address : IN  std_logic_vector(19 DOWNTO 0);
@@ -196,8 +196,9 @@ port(
 	RET: in std_logic;
 	memory_out: in std_logic_vector (19 downto 0);
 	data1_extended: in std_logic_vector (19 downto 0);
-	address: out std_logic_vector(19 downto 0)		--PC value or SP value or EA or SP+1..
+	address: out std_logic_vector(19 downto 0)	;	--PC value or SP value or EA or SP+1..
 
+	PC_plus_one : out std_logic_vector ( 19 downto 0)
 );
 end component;
 
@@ -218,7 +219,7 @@ end component;
       -- ALUC, ALUZ, ALUN : flags coming from the ALU
       -- setC, clC, ZN : signals coming from the control unit
       -- C, Z, N : Output flags
-      ALUC, ALUZ, ALUN, setC, clC, ZN, clk, rst, enable: IN std_logic;
+      ALUC, ALUZ, ALUN, setC, clC, ZN, clk, z_rst, n_rst, rst, enable: IN std_logic;
       C, Z, N : OUT std_logic
     );
   END component;
@@ -434,8 +435,8 @@ begin
   M_res_extended <= "0000000000000000" & M_res;
   Mux_M_write_data : Mux2 generic map (32) port map (M_res_extended, M_pc_plus_one_flags, M_call, M_write_data );
   temp_data1_extended<="0000"&D_final_Data1;
-  address_control_unit : Address_Module port map(stall_fetch, FAT, clk, reset, M_sp_add , M_eff_addr, M_mem_addr_src, M_sp_en, D_pc_src, M_ret, mem_out(31 downto 12), temp_data1_extended, address);
-  memory_unit : Memory port map(clk, M_mem_wr, W32, address, M_write_data, mem_out);
+  address_control_unit : Address_Module port map(stall_fetch, FAT, clk, reset, M_sp_add , M_eff_addr, M_mem_addr_src, M_sp_en, D_pc_src, M_ret, mem_out(19 downto 0), temp_data1_extended, address, F_pc_plus_one);
+  memory_unit : Memory port map(clk, reset, M_mem_wr, W32, address, M_write_data, mem_out);
     
 
   memory_reg_src_mux: Mux2 generic map (16) port map(mem_out (31 downto 16) , M_res, M_reg_src, M_res_muxed);
@@ -451,7 +452,7 @@ begin
   
   ----------------------------------- DECODE STAGE -----------------------------------
  
-  call_counter_comp : call_counter port map(clk, D_call, reset,call_counter_out);
+  call_counter_comp : call_counter port map(clk, D_ret, reset,call_counter_out);
 
   
   splitter: ResolveInstr port map(D_instr, D_before_NOP_mux_op_code, D_read_addr_1, D_read_addr_2, D_mem_data, D_eff_addr, D_shift_val);
@@ -481,6 +482,8 @@ begin
   ------------------------------------ ID/Ex Buffer -----------------------------------
   
   decode_execute_buffer_enable <= '1';--NOT HDU_LD_use;
+  D_pc_plus_one_flags <= "000000000000" & D_pc_plus_one;
+
   --decode_execute_buffer_reset <= buffered_decode_exexute_buffer_reset; --reset OR (HDU_LD_use AND (NOT  clk)) ;
 id_ex_buff: DecodeExBuffer port map(
     D_pc_src,
@@ -579,7 +582,7 @@ HDU: ForwardUnit port map (	E_wb,
 
   -- The flags module getting input from the ALU and the control unit
   flags_regs_enable <= '1';
-  D_flags_component : flags port map (E_ALU_C, E_ALU_Z, E_ALU_N, E_setc, E_clc, E_zn, clk, reset, flags_regs_enable, E_C, E_Z, E_N);
+  D_flags_component : flags port map (E_ALU_C, E_ALU_Z, E_ALU_N, E_setc, E_clc, E_zn, clk, E_clz, E_cln, reset, flags_regs_enable, E_C, E_Z, E_N);
 
   -- The mux selecting res from ALU, DATA1, PORT, and Immediate data
   res_mux : mux4 generic map (16) port map (E_ALU_res, E_read_data_1, E_port, E_eff_addr(15 downto 0), E_res_sel, E_res);
