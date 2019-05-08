@@ -484,7 +484,7 @@ begin
   ------------------------------------ ID/Ex Buffer -----------------------------------
   
   decode_execute_buffer_enable <= '1';--NOT HDU_LD_use;
-  D_pc_plus_one_flags <= "000000000000" & D_pc_plus_one;
+  D_pc_plus_one_flags <= "000000000101" & D_pc_plus_one;
 
   --decode_execute_buffer_reset <= buffered_decode_exexute_buffer_reset; --reset OR (HDU_LD_use AND (NOT  clk)) ;
 id_ex_buff: DecodeExBuffer port map(
@@ -642,13 +642,13 @@ ex_mem_rst <= reset;--OR (HDU_LD_use AND clk) ;
   zn <= E_zn or is_rti;
 
   w_c <= mem_out(20) when is_rti = '1'
-    else E_ALU_C
+    else E_ALU_C;
 
   w_z <= mem_out(21) when is_rti = '1'
-    else E_ALU_Z
+    else E_ALU_Z;
 
   w_n <= mem_out(22) when is_rti = '1'
-    else E_ALU_N
+    else E_ALU_N;
 
 
 end architecture;
