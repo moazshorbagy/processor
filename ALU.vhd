@@ -28,7 +28,7 @@ signal zeros16:std_logic_vector (m-1 downto 0);
 Signal result1:std_logic_vector (m-1 downto 0);
 Signal result2:std_logic_vector (m-1 downto 0);
 Signal mult:Std_Logic_vector 	(2*m-1 downto 0);
-signal Cout_sub:std_logic;
+signal Cout_sub,current_carry:std_logic;
 Signal sum_Int,sub_Int,shAmt,data1_Int,data2_Int,mult_Int:Integer;
 
 begin 
@@ -71,11 +71,23 @@ else (others=>'0');
 result2<=mult(m-1 downto 0) when (alu_op="111")
 else (others=>'0');
 
-C <= add_out(m) when (alu_op="001")
+
+
+C <= current_carry when (alu_op="000") 
+else add_out(m) when (alu_op="001")
 else cout_sub   when (alu_op="010")
 else data1(16-to_integer(unsigned(data2(3 downto 0)))) when (alu_op="101" AND to_integer(unsigned(data2(3 downto 0)))/=0)
 else data1(to_integer(unsigned(data2(3 downto 0)))-1) when (alu_op="110" AND to_integer(unsigned(data2(3 downto 0)))/=0)
 else '0';
+
+
+Current_carry <= current_carry when (alu_op="000") 
+else add_out(m) when (alu_op="001")
+else cout_sub   when (alu_op="010")
+else data1(16-to_integer(unsigned(data2(3 downto 0)))) when (alu_op="101" AND to_integer(unsigned(data2(3 downto 0)))/=0)
+else data1(to_integer(unsigned(data2(3 downto 0)))-1) when (alu_op="110" AND to_integer(unsigned(data2(3 downto 0)))/=0)
+else '0';
+
 
 Z<='1' when ((result1="0000000000000000") AND ((alu_op="000")OR(alu_op="001") OR (alu_op="010")OR (alu_op="011")OR(alu_op="100")OR (alu_op="101")OR (alu_op="110")))OR ((result1="0000000000000000")AND (result2="0000000000000000")AND (alu_op="111"))
 else '0';
