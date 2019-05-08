@@ -423,6 +423,8 @@ end component;
 
   signal WB_memory_data : std_logic_vector (15 downto 0);
 
+  -- flags signals
+  signal w_c, w_z, w_n, setc, clc, zn, is_rti: std_logic;
 
 -- begin architecture definition --
 begin
@@ -631,7 +633,22 @@ ex_mem_rst <= reset;--OR (HDU_LD_use AND clk) ;
   out_port <= WB_res when WB_output_enable = '1'
 		else "0000000000000000";
 
+  -- restoring flags --
 
+  is_rti <= M_Opcode(0) and M_Opcode(1) and (not M_Opcode(2)) and M_Opcode(3) and M_Opcode(4);
+
+  setc <= E_setc or is_rti;
+  clc <= E_clc or is_rti;
+  zn <= E_zn or is_rti;
+
+  w_c <= mem_out(20) when is_rti = '1'
+    else E_ALU_C
+
+  w_z <= mem_out(21) when is_rti = '1'
+    else E_ALU_Z
+
+  w_n <= mem_out(22) when is_rti = '1'
+    else E_ALU_N
 
 
 end architecture;
