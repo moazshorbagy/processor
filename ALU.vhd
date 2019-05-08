@@ -12,23 +12,37 @@ end entity;
 
 Architecture Operations of ALU is 
 
+component nbitfulladder is 
+generic (n: integer :=16);		--Giving the generic a value of 16 while instanciating it
+port (a,b: in std_logic_vector (n-1 downto 0);
+	sum: out std_logic_vector(n-1 downto 0);
+	cin: in std_logic ;
+	cout: out std_logic);
+end component;
+
 signal add_out:std_logic_vector 	(m downto 0);
-signal sub_out:std_logic_vector 	(m downto 0);
+signal sub_out:std_logic_vector 	(m-1 downto 0);
 signal cout: std_logic;
 signal not_data2:std_logic_vector(m-1 downto 0);
 signal zeros16:std_logic_vector (m-1 downto 0);
 Signal result1:std_logic_vector (m-1 downto 0);
 Signal result2:std_logic_vector (m-1 downto 0);
 Signal mult:Std_Logic_vector 	(2*m-1 downto 0);
+signal Cout_sub:std_logic;
 Signal sum_Int,sub_Int,shAmt,data1_Int,data2_Int,mult_Int:Integer;
+
 begin 
 
 mult_Int<=to_integer(unsigned(data1))*to_integer(unsigned(data2));
-not_data2 <= std_logic_vector(to_unsigned(to_integer(unsigned(not data2))+1,m));
+--not_data2 <= std_logic_vector(to_unsigned(to_integer(unsigned(not data2))+1,m));
 sum_Int<=to_integer(unsigned(data1))+to_integer(unsigned(data2));
-sub_Int<=to_integer(unsigned(data1))-to_integer(unsigned(data2));
+--sub_Int<=to_integer(unsigned(data1))-to_integer(unsigned(data2));
 add_out<=std_logic_vector(to_unsigned(sum_Int,17));
-sub_out<=std_logic_vector(to_unsigned(sub_Int,17));
+--sub_out<=(data1+NOT(data2)+"0000000000000001");
+
+Not_data2<= Not data2;
+
+A1: nbitfulladder port map(data1,Not_data2,sub_out,'1',cout_sub); --Subtraction
 
 mult<=std_logic_vector(to_unsigned(mult_Int,32));
 
@@ -58,7 +72,7 @@ result2<=mult(m-1 downto 0) when (alu_op="111")
 else (others=>'0');
 
 C <= add_out(m) when (alu_op="001")
-else sub_out(m) when (alu_op="010")
+else cout_sub   when (alu_op="010")
 else data1(16-to_integer(unsigned(data2(3 downto 0)))) when (alu_op="101" AND to_integer(unsigned(data2(3 downto 0)))/=0)
 else data1(to_integer(unsigned(data2(3 downto 0)))-1) when (alu_op="110" AND to_integer(unsigned(data2(3 downto 0)))/=0)
 else '0';
